@@ -1,23 +1,32 @@
 {
   "name": "@automators/datamaker",
+  "description": "The official Node.js / Typescript library for the DataMaker API",
+  "author": "Automators <office@automators.com>",
   "license": "MIT",
   "version": "0.0.1",
+  "homepage": "https://github.com/automators-com/datamaker-js",
+  "bugs": "https://github.com/automators-com/datamaker-js/issues",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
     "release": "pnpm run build && changeset publish",
     "lint": "tsc",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "changeset": "changeset "
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@types/node": "^20.10.4",
     "@vitest/coverage-v8": "^1.0.2",
     "tsup": "^8.0.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.7",
     "vitest": "^1.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
   }
 }
