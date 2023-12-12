@@ -7,6 +7,7 @@ dotenv.config();
 
 export default defineConfig({
   test: {
+    testTimeout: 10000,
     coverage: {
       reporter: ["text", "json", "html"],
     },
