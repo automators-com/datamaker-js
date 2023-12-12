@@ -23,3 +23,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm run build
       - run: pnpm run test
+        env:
+          DATAMAKER_API_KEY: ${{ secrets.DATAMAKER_API_KEY }}
