@@ -1,5 +1,13 @@
 # @automators/datamaker
 
+## 0.1.0
+
+### Minor Changes
+
+- e013c71: Implement basic instance instantiation and generate method to create data according to specified template.
+
+  Exporting Template and Field types to enable improved editor completions.
+
 ## 0.0.1
 
 ### Patch Changes
