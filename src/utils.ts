@@ -1,4 +1,5 @@
 import { DataMakerError } from "./error";
+import { AccountTemplate, Template } from "./template";
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -95,4 +96,12 @@ export const validatePositiveInteger = (name: string, n: unknown): number => {
     throw new DataMakerError(`${name} must be a positive integer`);
   }
   return n;
+};
+
+export const fetchDatamaker = async (url: string | undefined, headers: HeadersInit, template: Template | AccountTemplate) => {
+  return await fetch(`${url}/datamaker`, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(template),
+  });
 };

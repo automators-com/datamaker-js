@@ -1,7 +1,8 @@
 import { DefaultQuery, Fetch } from "./core";
-import { Fields, Template } from "./template";
+import { AccountTemplate, Fields, Template } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
+import { fetchDatamaker } from "./utils";
 
 interface ClientOptions {
   /**
@@ -96,25 +97,71 @@ class DataMaker {
       Authorization: `${this.apiKey}`,
       ...this.options.defaultHeaders,
     };
-  }
-
+  };
+  /**
+   * Generate data from custom template.
+   * @param template 
+   * @returns 
+   */
   async generate(template: Template) {
     if (!template) {
       throw new Errors.DataMakerError(
-        "You must provide a template to generate data"
+        "You must provide a template to generate data."
       );
-    }
+    };
 
     if (!template.quantity) {
       template.quantity = 1;
-    }
+    };
 
-    return await fetch(`${this.options.baseURL}/datamaker`, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify(template),
+    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json(); 
+  };
+  /**
+   * Generate data using template from you Datamaker account. Provide with unique name of a template from your account and a number of entries to be generated as arguments.
+   * Requires Datamaker api key to be defined in your project.
+   * @param templateName 
+   * @param quantity 
+   * @returns 
+   */
+  async generateFromTemplate(templateName: string, quantity: number = 1) {
+    const url = "https://public.datamaker.app/api/templates";
+    const headers = {
+      "Authorization": this.apiKey,
+      "Content-type": "application/json",  
+      "Credentials": "omit"   
+    };
+
+    const fetchTemplate = await fetch(url, {
+      method: "GET",
+        headers: headers
     });
-  }
-}
+
+    const templateData = await fetchTemplate.json();
+    let template = templateData.filter((temp: AccountTemplate) => temp.name === templateName);
+  
+    if (!templateData) {
+      throw new Errors.DataMakerError(
+        "No templates found in your account."
+      );
+    };
+    
+    if (!template) {
+      throw new Errors.DataMakerError(
+        "You must provide a name of a template from your account."
+      );
+    };
+
+    if (template.length > 1) {
+      throw new Errors.DataMakerError(
+        "Multiple templates of the same name have been found in your account. Provide with unique template name."
+      );
+    };
+
+    template = template[0];
+    template.quantity = quantity;
+    
+    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json();   
+  };
+};
 
 export { DataMaker, ClientOptions, Fields, Template };
