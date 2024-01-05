@@ -117,14 +117,14 @@ class DataMaker {
     return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json(); 
   };
   /**
-   * Generate data using template from you Datamaker account. Provide with unique name of a template from your account and a number of entries to be generated as arguments.
+   * Generate data using template from you Datamaker account. As arguments provide ID of a template from your account and a number of entries to be generated.
    * Requires Datamaker api key to be defined in your project.
-   * @param templateName 
+   * @param templateId 
    * @param quantity 
    * @returns 
    */
-  async generateFromTemplate(templateName: string, quantity: number = 1) {
-    const url = "https://public.datamaker.app/api/templates";
+  async generateFromTemplate(templateId: string, quantity: number = 1) {        
+    const url = `${this.options.baseURL}/templates`;
     const headers = {
       "Authorization": this.apiKey,
       "Content-type": "application/json",  
@@ -137,7 +137,7 @@ class DataMaker {
     });
 
     const templateData = await fetchTemplate.json();
-    let template = templateData.filter((temp: AccountTemplate) => temp.name === templateName);
+    let template = templateData.filter((temp: AccountTemplate) => temp.id === templateId);
   
     if (!templateData) {
       throw new Errors.DataMakerError(
@@ -147,13 +147,7 @@ class DataMaker {
     
     if (!template) {
       throw new Errors.DataMakerError(
-        "You must provide a name of a template from your account."
-      );
-    };
-
-    if (template.length > 1) {
-      throw new Errors.DataMakerError(
-        "Multiple templates of the same name have been found in your account. Provide with unique template name."
+        "You must provide ID of a template from your account."
       );
     };
 
