@@ -379,3 +379,14 @@ export type Template = {
   fields: Fields;
   quantity?: number;
 };
+
+export type AccountTemplate = {
+  id: string;
+  name: string;
+  fields: Fields;
+  createdAt: string;
+  createdBy: string;
+  templateFolderId: null,
+  teamId: string;
+  seed: null
+};
