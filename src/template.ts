@@ -419,3 +419,7 @@ export type CustomEndpoint = {
   method: string;
   headers?: object;
 };
+export type DBQuery = {
+  connectionId: string; 
+  query: string;
+};

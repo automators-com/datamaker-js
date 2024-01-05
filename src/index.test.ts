@@ -1,8 +1,8 @@
 import { DataMaker } from "./index";
 import { expect, test } from "vitest";
-import { CustomEndpoint, Data } from "./template";
+import { CustomEndpoint, Data, DBQuery } from "./template";
 
-const baseUrl = "https://public.datamaker.app/api";
+const baseUrl = "https://cloud.datamaker.app/api";
 
 test("Test creating an instance ", () => {
   const datamaker = new DataMaker({
@@ -171,4 +171,58 @@ test('Send generated data to API endpoint defined in code', async () => {
     const deleteData = await deleteResult.json();    
     expect(deleteData.id).equal(entry.id);
   };
+});
+
+test.only("Db push", async () => {
+  const datamaker = new DataMaker({});
+  const url = `${baseUrl}/connections`;
+  const headers: any = {
+    "Authorization": process.env["DATAMAKER_API_KEY"],
+    "Content-type": "application/json",  
+    "Credentials": "omit"
+  };
+
+  const fetchConnections = await fetch(url, {
+    method: "GET",
+    headers: headers
+  });
+
+  const connectionsData = await fetchConnections.json();
+  const connection = connectionsData.find((conn: any) => conn.name == "Datamaker");   
+
+  const fetchTemplate = await fetch(`${baseUrl}/templates`, {
+    method: "GET",
+    headers: headers
+  });
+
+  const templateData = await fetchTemplate.json();  
+  const template = templateData.find((temp: any) => temp.name == "Connection"); 
+  
+  const data = await datamaker.generateFromTemplateId(template.id);
+
+  const body: DBQuery = {
+    connectionId: connection.id,
+    query: `INSERT INTO "Connection" (${Object.keys(data).map(key => `"${key}"`).join(", ")}) VALUES (${Object.values(data).map(value => `'${value}'`).join(", ")});`
+  };
+
+  console.log(body);
+  
+
+  const push = await fetch("https://dev.datamaker.app/api/export/db", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(body)
+  });
+  //const pushData = await push.json();
+  console.log(push);
+  
+  const deleteConnection = await fetch(`https://dev.datamaker.app/api/connections/${data.id}`, {
+    method: "DELETE",
+    headers: headers 
+  });
+  console.log(deleteConnection);
+  const deleteData = await deleteConnection.json();
+  expect(deleteData.id).toBe(data.id);
+  
+
 });
