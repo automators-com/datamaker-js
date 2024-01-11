@@ -1,4 +1,3 @@
-import exp from "constants";
 import { DataMaker } from "./index";
 import { expect, test } from "vitest";
 
@@ -89,13 +88,24 @@ test("Basic data generation", async () => {
           },
         },
       ],
-    })
-    .then((res) => res.json())
-    .then((data) => data);
+    });
 
   expect(res.length).toBe(1);
   expect(res[0].first_name).toBeDefined();
   expect(res[0].last_name).toBeDefined();
   expect(res[0].email).toBeDefined();
   expect(res[0].email).toContain(res[0].first_name);
+});
+
+test('Generate data from template in account', async () => {
+  const quantity = 2;
+  const datamaker = new DataMaker({});
+  const result = await datamaker
+    .generateFromTemplateId("clr0ddsrk0001jr09r5kxkt4a", quantity); 
+    
+  expect(result.length).toBe(quantity);
+  expect(result[0]["First Name"]).toBeDefined();
+  expect(result[0]["Last Name"]).toBeDefined();
+  expect(result[0]["Age"]).toBeDefined();
+  expect(result[0]["Street"]).toBeDefined();
 });
