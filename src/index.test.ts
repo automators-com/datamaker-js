@@ -2,7 +2,7 @@ import { DataMaker } from "./index";
 import { expect, test } from "vitest";
 import { CustomEndpoint, Data } from "./template";
 
-const baseUrl = "https://public.datamaker.app/api/";
+const baseUrl = "https://public.datamaker.app/api";
 
 test("Test creating an instance ", () => {
   const datamaker = new DataMaker({
@@ -120,8 +120,8 @@ test('Send multiple generated data to API endpoint in account', async () => {
     "Content-type": "application/json",  
     "Credentials": "omit"   
   };
-  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 3);
-  const result: Data[] = await datamaker.exportToApi(data, "clr8uh27l0001l108cr92wxjo");
+  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 2);
+  const result: Data[] = await datamaker.exportToApi("clr8uh27l0001l108cr92wxjo", data);
 
   expect(result[0]?.name).toBeDefined();
   expect(result[0]?.name).equal(data[0].name);
@@ -131,7 +131,7 @@ test('Send multiple generated data to API endpoint in account', async () => {
   expect(result[0]?.createdBy).equal(data[0].createdBy);
   
   for (const entry of result) {
-    const deleteResult = await fetch(`${baseUrl}connections/${entry.id}`, {
+    const deleteResult = await fetch(`${baseUrl}/connections/${entry.id}`, {
       method: "DELETE",
       headers: headers
     });
@@ -149,12 +149,12 @@ test('Send generated data to API endpoint defined in code', async () => {
   };
   const endpoint: CustomEndpoint = {
     method: "POST",
-    url: `${baseUrl}connections`,
+    url: `${baseUrl}/connections`,
     headers: headers
   };
 
-  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 4);
-  const result: Data[] = await datamaker.exportToApi(data, endpoint);
+  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 1);
+  const result: Data[] = await datamaker.exportToApi(endpoint, data);
 
   expect(result[0]?.name).toBeDefined();
   expect(result[0]?.name).equal(data[0].name);
@@ -164,7 +164,7 @@ test('Send generated data to API endpoint defined in code', async () => {
   expect(result[0]?.createdBy).equal(data[0].createdBy);
   
   for (const entry of result) {
-    const deleteResult = await fetch(`${baseUrl}connections/${entry.id}`, {
+    const deleteResult = await fetch(`${baseUrl}/connections/${entry.id}`, {
       method: "DELETE",
       headers: headers
     });

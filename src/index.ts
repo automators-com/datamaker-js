@@ -151,11 +151,11 @@ class DataMaker {
   /**
    * Send data to an endpoint. In parameters provide with endpoint compatible data as array of objects
    * and with API endpoint either as ID of an endpoint from your account or as an object.
-   * @param data 
    * @param api 
+   * @param data 
    * @returns 
    */
-  async exportToApi(data: object[], api: string | CustomEndpoint) {  
+  async exportToApi(api: string | CustomEndpoint, data: object[]) {  
     const url = `${this.options.baseURL}/endpoints`;
     let targetEndpoint: Endpoint | CustomEndpoint;
     let result: Array<{}> = [];
