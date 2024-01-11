@@ -101,7 +101,7 @@ test('Generate data from template in account', async () => {
   const quantity = 2;
   const datamaker = new DataMaker({});
   const result = await datamaker
-    .generateFromTemplate("clr0ddsrk0001jr09r5kxkt4a", quantity); 
+    .generateFromTemplateId("clr0ddsrk0001jr09r5kxkt4a", quantity); 
     
   expect(result.length).toBe(quantity);
   expect(result[0]["First Name"]).toBeDefined();

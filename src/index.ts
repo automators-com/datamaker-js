@@ -123,7 +123,7 @@ class DataMaker {
    * @param quantity 
    * @returns 
    */
-  async generateFromTemplate(templateId: string, quantity: number = 1) {        
+  async generateFromTemplateId(templateId: string, quantity: number = 1) {        
     const url = `${this.options.baseURL}/templates`;
     const headers = {
       "Authorization": this.apiKey,
