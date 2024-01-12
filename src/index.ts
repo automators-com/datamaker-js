@@ -103,7 +103,7 @@ class DataMaker {
    * @param template 
    * @returns 
    */
-  async generate(template: any) {
+  async generate(template: Template) {
     if (!template) {
       throw new Errors.DataMakerError(
         "You must provide a template to generate data."
