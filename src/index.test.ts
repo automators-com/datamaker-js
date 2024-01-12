@@ -113,7 +113,7 @@ test('Generate data from template in account', async () => {
   expect(result[0]["Street"]).toBeDefined();  
 });
 
-test('Send multiple generated data to API endpoint in account', async () => {
+test('Send multiple generated data to API endpoint from account', async () => {
   const datamaker = new DataMaker({});
   const headers: any = {
     "Authorization": process.env["DATAMAKER_API_KEY"],

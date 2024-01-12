@@ -1,5 +1,5 @@
 import { DefaultQuery, Fetch } from "./core";
-import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint } from "./template";
+import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
 import { fetchDatamaker } from "./utils";
@@ -201,4 +201,4 @@ class DataMaker {
   };
 };
 
-export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint };
+export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint, Data };
