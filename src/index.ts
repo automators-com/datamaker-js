@@ -1,5 +1,5 @@
 import { DefaultQuery, Fetch } from "./core";
-import { AccountTemplate, Fields, Template } from "./template";
+import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
 import { fetchDatamaker } from "./utils";
@@ -112,8 +112,7 @@ class DataMaker {
 
     if (!template.quantity) {
       template.quantity = 1;
-    };
-
+    };   
     return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json(); 
   };
   /**
@@ -125,19 +124,14 @@ class DataMaker {
    */
   async generateFromTemplateId(templateId: string, quantity: number = 1) {        
     const url = `${this.options.baseURL}/templates`;
-    const headers = {
-      "Authorization": this.apiKey,
-      "Content-type": "application/json",  
-      "Credentials": "omit"   
-    };
 
     const fetchTemplate = await fetch(url, {
       method: "GET",
-        headers: headers
+        headers: this.headers
     });
 
     const templateData = await fetchTemplate.json();
-    let template = templateData.filter((temp: AccountTemplate) => temp.id === templateId);
+    let template = templateData.find((temp: AccountTemplate) => temp.id === templateId);
   
     if (!templateData) {
       throw new Errors.DataMakerError(
@@ -150,12 +144,61 @@ class DataMaker {
         "You must provide ID of a template from your account."
       );
     };
-
-    template = template[0];
+  
     template.quantity = quantity;
-    
-    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json();   
+    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json();  
+  };
+  /**
+   * Send data to an endpoint. In parameters provide with endpoint compatible data as array of objects
+   * and with API endpoint either as ID of an endpoint from your account or as an object.
+   * @param api 
+   * @param data 
+   * @returns 
+   */
+  async exportToApi(api: string | CustomEndpoint, data: object[]) {  
+    const url = `${this.options.baseURL}/endpoints`;
+    let targetEndpoint: Endpoint | CustomEndpoint;
+    let result: Array<{}> = [];
+    let headers: any = this.headers;  
+
+    if (typeof api == "string") {
+      const fetchEnpoints = await fetch(url, {
+        method: "GET",
+        headers: this.headers
+      });
+  
+      const endpointData = await fetchEnpoints.json();
+      const endpoint = endpointData.find((endpoint: Endpoint) => endpoint.id === api);
+      targetEndpoint = endpoint;
+
+      if (Object.keys(endpoint.headers).length > 0) {
+        headers = endpoint.headers;
+      };    
+
+    } else {
+      targetEndpoint = api;
+      if(api.headers) {
+        headers = api.headers;
+      };      
+    };
+        
+    for (const entry of data) {
+      const apiCall = await fetch(targetEndpoint.url, {
+        method: targetEndpoint.method,
+        headers,
+        body: JSON.stringify(entry)
+      });
+
+      const callData = await apiCall.json();
+      result.push(callData);
+    };
+   
+    if (result) return result; 
+   
+    throw new Errors.DataMakerError(
+      "Something went wrong."
+    );      
   };
 };
 
-export { DataMaker, ClientOptions, Fields, Template };
+export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint, Data };

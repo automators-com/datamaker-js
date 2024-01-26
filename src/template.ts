@@ -390,3 +390,32 @@ export type AccountTemplate = {
   teamId: string;
   seed: null
 };
+
+export type Endpoint = {
+  id: string;
+  name: string;
+  method: string;
+  url: string;
+  headers?: object;
+  queryParams?: object;
+  createdAt: string;
+  createdBy: string;
+  teamId?: string;
+  endpointFolderId?: string | null;
+};
+
+export type Headers = {
+  Authorization: string | undefined;
+  "Content-type": string;  
+  Credentials: string;
+};
+
+export type Data = {
+  [key: string]: string | number;
+};
+
+export type CustomEndpoint = {
+  url: string;
+  method: string;
+  headers?: object;
+};

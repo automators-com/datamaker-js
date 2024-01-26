@@ -1,5 +1,8 @@
 import { DataMaker } from "./index";
 import { expect, test } from "vitest";
+import { CustomEndpoint, Data } from "./template";
+
+const baseUrl = "https://public.datamaker.app/api";
 
 test("Test creating an instance ", () => {
   const datamaker = new DataMaker({
@@ -107,5 +110,65 @@ test('Generate data from template in account', async () => {
   expect(result[0]["First Name"]).toBeDefined();
   expect(result[0]["Last Name"]).toBeDefined();
   expect(result[0]["Age"]).toBeDefined();
-  expect(result[0]["Street"]).toBeDefined();
+  expect(result[0]["Street"]).toBeDefined();  
+});
+
+test('Send multiple generated data to API endpoint from account', async () => {
+  const datamaker = new DataMaker({});
+  const headers: any = {
+    "Authorization": process.env["DATAMAKER_API_KEY"],
+    "Content-type": "application/json",  
+    "Credentials": "omit"   
+  };
+  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 2);
+  const result: Data[] = await datamaker.exportToApi("clr8uh27l0001l108cr92wxjo", data);
+
+  expect(result[0]?.name).toBeDefined();
+  expect(result[0]?.name).equal(data[0].name);
+  expect(result[0]?.connectionString).toBeDefined();
+  expect(result[0]?.connectionString).equal(data[0].connectionString);
+  expect(result[0]?.createdBy).toBeDefined();
+  expect(result[0]?.createdBy).equal(data[0].createdBy);
+  
+  for (const entry of result) {
+    const deleteResult = await fetch(`${baseUrl}/connections/${entry.id}`, {
+      method: "DELETE",
+      headers: headers
+    });
+    const deleteData = await deleteResult.json();    
+    expect(deleteData.id).equal(entry.id);
+  };
+});
+
+test('Send generated data to API endpoint defined in code', async () => {
+  const datamaker = new DataMaker({});
+  const headers: any = {
+    "Authorization": process.env["DATAMAKER_API_KEY"],
+    "Content-type": "application/json",  
+    "Credentials": "omit"   
+  };
+  const endpoint: CustomEndpoint = {
+    method: "POST",
+    url: `${baseUrl}/connections`,
+    headers: headers
+  };
+
+  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 1);
+  const result: Data[] = await datamaker.exportToApi(endpoint, data);
+
+  expect(result[0]?.name).toBeDefined();
+  expect(result[0]?.name).equal(data[0].name);
+  expect(result[0]?.connectionString).toBeDefined();
+  expect(result[0]?.connectionString).equal(data[0].connectionString);
+  expect(result[0]?.createdBy).toBeDefined();
+  expect(result[0]?.createdBy).equal(data[0].createdBy);
+  
+  for (const entry of result) {
+    const deleteResult = await fetch(`${baseUrl}/connections/${entry.id}`, {
+      method: "DELETE",
+      headers: headers
+    });
+    const deleteData = await deleteResult.json();    
+    expect(deleteData.id).equal(entry.id);
+  };
 });
