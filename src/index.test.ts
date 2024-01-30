@@ -176,7 +176,7 @@ test('Send generated data to API endpoint defined in code', async () => {
   };
 });
 
-test("Export generated date into DB saved in account", async () => {
+test("Export generated data into DB saved in account", async () => {
   const datamaker = new DataMaker({});
   const headers: any = {
     "Authorization": process.env["DEV_ACCOUNT_API"],
