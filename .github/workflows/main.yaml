@@ -25,3 +25,4 @@ jobs:
       - run: pnpm run test
         env:
           DATAMAKER_API_KEY: ${{ secrets.DATAMAKER_API_KEY }}
+          DEV_ACCOUNT_API: ${{secrets.DEV_ACCOUNT_API}}

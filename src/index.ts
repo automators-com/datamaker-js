@@ -1,5 +1,5 @@
 import { DefaultQuery, Fetch } from "./core";
-import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data } from "./template";
+import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data, DBQuery } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
 import { fetchDatamaker } from "./utils";
@@ -87,7 +87,7 @@ class DataMaker {
     const options: ClientOptions = {
       apiKey,
       ...opts,
-      baseURL: opts.baseURL ?? `https://public.datamaker.app/api`,
+      baseURL: opts.baseURL ?? `https://cloud.datamaker.app/api`,
     };
 
     this.apiKey = apiKey;
@@ -198,6 +198,84 @@ class DataMaker {
     throw new Errors.DataMakerError(
       "Something went wrong."
     );      
+  };
+
+  /**
+   * Export data to database saved in your Datamaker account. In parameters provide with DB Bridge connection ID,
+   * name of database table to export data into and with data to be exported.
+   * @param connectionId 
+   * @param tableName 
+   * @param data 
+   * @returns 
+   */
+  async exportToDB(connectionId: string, tableName: string, data: object[]) {
+    try {
+      // Fetch connection details
+      const fetchConnection = await fetch(`${this.options.baseURL}/connections`, {
+        method: "GET",
+        headers: this.headers
+      });
+
+      if (!fetchConnection.ok) {
+        throw new Errors.DataMakerError("Failed to fetch connection details.");
+      };
+
+      const connectionsData = await fetchConnection.json();
+      const connection = connectionsData.find((db: Data) => db.id === connectionId);
+
+      if (!connection) {
+        throw new Errors.DataMakerError("Connection not found.");
+      };
+
+      // Test connection
+      const testBody: { connectionString: string, type: string } = {
+        connectionString: connection.connectionString,
+        type: connection.type
+      };
+
+      const testConnection = await fetch(`${this.options.baseURL}/connections/test`, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(testBody)
+      });
+
+      if (testConnection.status !== 200) {
+        throw new Errors.DataMakerError(
+          "Your connection is not working."
+        );
+      };  
+      
+      // Loop through each entry in the data array and construct values to be pushed to DB
+      let values: string[] = [];
+
+      for (const entry of data) {
+        const entryValues = Object.values(entry).map(value => `'${value}'`).join(", ");
+        values.push(`(${entryValues})`);
+      };
+
+      const body: DBQuery = {
+        connectionId: connection.id,
+        query: `INSERT INTO "${tableName}" (${Object.keys(data[0]!).map(key => `"${key}"`).join(", ")}) VALUES ${values.join(", ")};`
+      };
+
+      // Push to DB
+      const push = await fetch(`${this.options.baseURL}/export/db`, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(body)
+      });
+
+      if (!push.ok) {
+        throw new Errors.DataMakerError("Failed to export data to DB.");
+      };
+
+      const pushData = await push.json();
+      return pushData;
+
+  } catch (error) {
+      console.log(error);
+      throw error;
+    };
   };
 };
 

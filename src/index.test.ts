@@ -1,8 +1,8 @@
 import { DataMaker } from "./index";
 import { expect, test } from "vitest";
-import { CustomEndpoint, Data } from "./template";
+import { CustomEndpoint, Data} from "./template";
 
-const baseUrl = "https://public.datamaker.app/api";
+const baseUrl = "https://cloud.datamaker.app/api";
 
 test("Test creating an instance ", () => {
   const datamaker = new DataMaker({
@@ -104,13 +104,16 @@ test('Generate data from template in account', async () => {
   const quantity = 2;
   const datamaker = new DataMaker({});
   const result = await datamaker
-    .generateFromTemplateId("clr0ddsrk0001jr09r5kxkt4a", quantity); 
+    .generateFromTemplateId("clrupt3c7000218qdcaxh9i9i", quantity); 
     
   expect(result.length).toBe(quantity);
-  expect(result[0]["First Name"]).toBeDefined();
-  expect(result[0]["Last Name"]).toBeDefined();
-  expect(result[0]["Age"]).toBeDefined();
-  expect(result[0]["Street"]).toBeDefined();  
+  expect(result[0]["id"]).toBeDefined();
+  expect(result[0]["name"]).toBeDefined();
+  expect(result[0]["type"]).toBeDefined();
+  expect(result[0]["connectionString"]).toBeDefined();  
+  expect(result[0]["readOnly"]).toBeDefined();  
+  expect(result[0]["createdBy"]).toBeDefined();  
+  expect(result[0]["teamId"]).toBeDefined();  
 });
 
 test('Send multiple generated data to API endpoint from account', async () => {
@@ -120,8 +123,8 @@ test('Send multiple generated data to API endpoint from account', async () => {
     "Content-type": "application/json",  
     "Credentials": "omit"   
   };
-  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 2);
-  const result: Data[] = await datamaker.exportToApi("clr8uh27l0001l108cr92wxjo", data);
+  const data = await datamaker.generateFromTemplateId("clrupt3c7000218qdcaxh9i9i", 2);
+  const result: Data[] = await datamaker.exportToApi("clryyx7f10004ki5yhdbnhv5y", data);  
 
   expect(result[0]?.name).toBeDefined();
   expect(result[0]?.name).equal(data[0].name);
@@ -153,7 +156,7 @@ test('Send generated data to API endpoint defined in code', async () => {
     headers: headers
   };
 
-  const data = await datamaker.generateFromTemplateId("clr8yxrcy0001l808m70stapk", 1);
+  const data = await datamaker.generateFromTemplateId("clrupt3c7000218qdcaxh9i9i", 1);  
   const result: Data[] = await datamaker.exportToApi(endpoint, data);
 
   expect(result[0]?.name).toBeDefined();
@@ -170,5 +173,28 @@ test('Send generated data to API endpoint defined in code', async () => {
     });
     const deleteData = await deleteResult.json();    
     expect(deleteData.id).equal(entry.id);
+  };
+});
+
+test("Export generated data into DB saved in account", async () => {
+  const datamaker = new DataMaker({});
+  const headers: any = {
+    "Authorization": process.env["DEV_ACCOUNT_API"],
+    "Content-type": "application/json",
+    "Credentials": "omit"
+  };
+
+  const data = await datamaker.generateFromTemplateId("cls08ncye0001h7piad743zaa", 1);
+  await datamaker.exportToDB("clryufquy0001qvvvb4b6tyzz", "Connection", data);
+
+  for (const entry of data) {
+    const deleteConnection = await fetch(`https://dev.datamaker.app/api/connections/${entry.id}`, {
+      method: "DELETE",
+      headers: headers
+    });
+    
+    expect(deleteConnection.status).toBe(200);
+    const deleteData = await deleteConnection.json();
+    expect(deleteData.id).toBe(entry.id);
   };
 });
