@@ -3,7 +3,7 @@
   "description": "The official Node.js / Typescript library for the DataMaker API",
   "author": "Automators <office@automators.com>",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "https://github.com/automators-com/datamaker-js",
   "bugs": "https://github.com/automators-com/datamaker-js/issues",
   "main": "dist/index.js",
