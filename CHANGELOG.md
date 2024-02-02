@@ -4,7 +4,10 @@
 
 ### Minor Changes
 
-- 98a25ed: Add additional export methods
+- 360c738: Implement exportToApi() method that exports data either to endpoint saved in Datamaker account or to a custom endpoint defined in code.
+- 17fb18a: Implement exportToDB() method that exports data to database connection saved in Datamaker account.
+
+  Adding more examples of effective work with the package.
 
 ## 0.1.0
 
