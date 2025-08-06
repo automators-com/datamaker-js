@@ -504,9 +504,10 @@ class DataMaker {
       updatedAt?: string;
     }
   ) {
-    if (!id) {
-      throw new Errors.DataMakerError("Team ID is required to update.");
+    if (!id || !updates.name) {
+      throw new Errors.DataMakerError("Missing required team fields: id, name");
     }
+  
     const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
       method: "PUT",
       headers: this.headers,
