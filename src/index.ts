@@ -507,7 +507,7 @@ class DataMaker {
     if (!id || !updates.name) {
       throw new Errors.DataMakerError("Missing required team fields: id, name");
     }
-  
+
     const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
       method: "PUT",
       headers: this.headers,
@@ -541,6 +541,150 @@ class DataMaker {
         `Failed to delete team: ${response.statusText}`
       );
     }
+    return response.json();
+  }
+
+  // ==================== TEAM MEMBERS ENDPOINTS =========================
+
+  /**
+   * Get all team members.
+   * @returns A list of all team members.
+   */
+  async getTeamMembers() {
+    const response = await fetch(`${this.options.baseURL}/teamMembers`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError("Failed to fetch team members.");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Create a new team member.
+   * @param member - Object containing userId, teamId, and role.
+   * @returns The newly created team member.
+   */
+  async createTeamMember(member: {
+    userId: string;
+    teamId: string;
+    role: "MEMBER" | "OWNER";
+  }) {
+    const { userId, teamId, role } = member;
+
+    if (!userId || !teamId || !role) {
+      throw new Errors.DataMakerError(
+        "Missing required fields: userId, teamId, or role."
+      );
+    }
+
+    const response = await fetch(`${this.options.baseURL}/teamMembers`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(member),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError("Failed to create team member.");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Invite a team member by email.
+   * @param invite - Object containing email, teamId, and optional role.
+   * @returns The invitation result.
+   */
+  async inviteTeamMember(invite: {
+    email: string;
+    teamId: string;
+    role?: "MEMBER" | "OWNER";
+  }) {
+    const { email, teamId } = invite;
+
+    if (!email || !teamId) {
+      throw new Errors.DataMakerError(
+        "Missing required fields: email or teamId."
+      );
+    }
+
+    const response = await fetch(`${this.options.baseURL}/teamMembers/invite`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(invite),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError("Failed to invite team member.");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Update a team member by ID.
+   * @param id - The team member's ID.
+   * @param updates - Object containing userId, teamId, and role.
+   * @returns The updated team member.
+   */
+  async updateTeamMember(
+    id: string,
+    updates: {
+      userId: string;
+      teamId: string;
+      role: "MEMBER" | "OWNER";
+    }
+  ) {
+    if (!id) {
+      throw new Errors.DataMakerError("Team member ID is required to update.");
+    }
+
+    if (!updates.userId || !updates.teamId || !updates.role) {
+      throw new Errors.DataMakerError(
+        "Missing required fields in team member update: userId, teamId, or role."
+      );
+    }
+
+    const response = await fetch(`${this.options.baseURL}/teamMembers/${id}`, {
+      method: "PUT",
+      headers: this.headers,
+      body: JSON.stringify(updates),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to update team member with ID: ${id}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Delete a team member by ID.
+   * @param id - The ID of the team member to delete.
+   * @returns A success message or status.
+   */
+  async deleteTeamMember(id: string) {
+    if (!id) {
+      throw new Errors.DataMakerError("Team member ID is required to delete.");
+    }
+
+    const response = await fetch(`${this.options.baseURL}/teamMembers/${id}`, {
+      method: "DELETE",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to delete team member with ID: ${id}`
+      );
+    }
+
     return response.json();
   }
 }
