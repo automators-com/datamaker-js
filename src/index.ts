@@ -1,5 +1,13 @@
 import { DefaultQuery, Fetch } from "./core";
-import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data, DBQuery } from "./template";
+import {
+  AccountTemplate,
+  Fields,
+  Template,
+  Endpoint,
+  CustomEndpoint,
+  Data,
+  DBQuery,
+} from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
 import { fetchDatamaker } from "./utils";
@@ -433,6 +441,11 @@ class DataMaker {
       method: "GET",
       headers: this.headers,
     });
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to fetch teams: ${response.statusText}`
+      );
+    }
     return response.json();
   }
 
@@ -453,11 +466,20 @@ class DataMaker {
     createdAt?: string;
     updatedAt?: string;
   }) {
+    if (!team.name) {
+      throw new Errors.DataMakerError("Team name is required.");
+    }
     const response = await fetch(`${this.options.baseURL}/teams`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify(team),
     });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to create team: ${response.statusText}`
+      );
+    }
     return response.json();
   }
 
@@ -482,11 +504,18 @@ class DataMaker {
       updatedAt?: string;
     }
   ) {
+    if (!id) {
+      throw new Errors.DataMakerError("Team ID is required to update.");
+    }
     const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
       method: "PUT",
       headers: this.headers,
       body: JSON.stringify(updates),
     });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(`Failed to update team with ID:${id}`);
+    }
     return response.json();
   }
 
@@ -498,12 +527,21 @@ class DataMaker {
    * @returns
    */
   async deleteTeam(id: string) {
+    if (!id) {
+      throw new Errors.DataMakerError("Team ID is required to delete.");
+    }
     const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
       method: "DELETE",
       headers: this.headers,
     });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to delete team: ${response.statusText}`
+      );
+    }
     return response.json();
   }
-};
+}
 
 export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint, Data };
