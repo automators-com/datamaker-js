@@ -290,6 +290,8 @@ class DataMaker {
     }
   }
 
+  // ==================== PROJECTS ENDPOINTS =========================
+
   /**
    * Get all projects.
    * @returns A list of all projects available to the authenticated user.
@@ -415,6 +417,91 @@ class DataMaker {
       );
     }
 
+    return response.json();
+  }
+
+  // ==================== TEAMS ENDPOINTS =========================
+
+  /**
+   * Fetch a list of all teams.
+   *
+   * @returns A list of teams.
+   */
+
+  async getTeams() {
+    const response = await fetch(`${this.options.baseURL}/teams`, {
+      method: "GET",
+      headers: this.headers,
+    });
+    return response.json();
+  }
+
+  /**
+   * Create a new team.
+   *
+   * @param team - An object containing the team's information.
+   * @param team.name - The name of the team (required).
+   * @param team.avatar - Optional avatar URL for the team.
+   * @param team.createdAt - Optional ISO date string.
+   * @param team.updatedAt - Optional ISO date string.
+   *
+   * @returns
+   */
+  async createTeam(team: {
+    name: string;
+    avatar?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  }) {
+    const response = await fetch(`${this.options.baseURL}/teams`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(team),
+    });
+    return response.json();
+  }
+
+  /**
+   * Update an existing team by its ID.
+   *
+   * @param id - The ID of the team to update (required).
+   * @param updates - An object containing the updated fields.
+   * @param updates.name - The updated name of the team (required).
+   * @param updates.avatar - Optional updated avatar URL.
+   * @param updates.createdAt - Optional updated creation timestamp.
+   * @param updates.updatedAt - Optional updated timestamp.
+   *
+   * @returns An object with the updated team data.
+   */
+  async updateTeam(
+    id: string,
+    updates: {
+      name: string;
+      avatar?: string;
+      createdAt?: string;
+      updatedAt?: string;
+    }
+  ) {
+    const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
+      method: "PUT",
+      headers: this.headers,
+      body: JSON.stringify(updates),
+    });
+    return response.json();
+  }
+
+  /**
+   * Delete a team by its ID.
+   *
+   * @param id - The ID of the team to delete.
+   *
+   * @returns
+   */
+  async deleteTeam(id: string) {
+    const response = await fetch(`${this.options.baseURL}/teams/${id}`, {
+      method: "DELETE",
+      headers: this.headers,
+    });
     return response.json();
   }
 };
