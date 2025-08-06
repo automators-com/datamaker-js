@@ -97,186 +97,326 @@ class DataMaker {
       Authorization: `${this.apiKey}`,
       ...this.options.defaultHeaders,
     };
-  };
+  }
   /**
    * Generate data from custom template.
-   * @param template 
-   * @returns 
+   * @param template
+   * @returns
    */
   async generate(template: Template) {
     if (!template) {
       throw new Errors.DataMakerError(
         "You must provide a template to generate data."
       );
-    };
+    }
 
     if (!template.quantity) {
       template.quantity = 1;
-    };   
-    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json(); 
-  };
+    }
+    return (
+      await fetchDatamaker(this.options.baseURL, this.headers, template)
+    ).json();
+  }
   /**
    * Generate data using template from you Datamaker account. As arguments provide ID of a template from your account and a number of entries to be generated.
    * Requires Datamaker api key to be defined in your project.
-   * @param templateId 
-   * @param quantity 
-   * @returns 
+   * @param templateId
+   * @param quantity
+   * @returns
    */
-  async generateFromTemplateId(templateId: string, quantity: number = 1) {        
+  async generateFromTemplateId(templateId: string, quantity: number = 1) {
     const url = `${this.options.baseURL}/templates`;
 
     const fetchTemplate = await fetch(url, {
       method: "GET",
-        headers: this.headers
+      headers: this.headers,
     });
 
     const templateData = await fetchTemplate.json();
-    let template = templateData.find((temp: AccountTemplate) => temp.id === templateId);
-  
+    let template = templateData.find(
+      (temp: AccountTemplate) => temp.id === templateId
+    );
+
     if (!templateData) {
-      throw new Errors.DataMakerError(
-        "No templates found in your account."
-      );
-    };
-    
+      throw new Errors.DataMakerError("No templates found in your account.");
+    }
+
     if (!template) {
       throw new Errors.DataMakerError(
         "You must provide ID of a template from your account."
       );
-    };
-  
+    }
+
     template.quantity = quantity;
-    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json();  
-  };
+    return (
+      await fetchDatamaker(this.options.baseURL, this.headers, template)
+    ).json();
+  }
   /**
    * Send data to an endpoint. In parameters provide with endpoint compatible data as array of objects
    * and with API endpoint either as ID of an endpoint from your account or as an object.
-   * @param api 
-   * @param data 
-   * @returns 
+   * @param api
+   * @param data
+   * @returns
    */
-  async exportToApi(api: string | CustomEndpoint, data: object[]) {  
+  async exportToApi(api: string | CustomEndpoint, data: object[]) {
     const url = `${this.options.baseURL}/endpoints`;
     let targetEndpoint: Endpoint | CustomEndpoint;
     let result: Array<{}> = [];
-    let headers: any = this.headers;  
+    let headers: any = this.headers;
 
     if (typeof api == "string") {
       const fetchEnpoints = await fetch(url, {
         method: "GET",
-        headers: this.headers
+        headers: this.headers,
       });
-  
+
       const endpointData = await fetchEnpoints.json();
-      const endpoint = endpointData.find((endpoint: Endpoint) => endpoint.id === api);
+      const endpoint = endpointData.find(
+        (endpoint: Endpoint) => endpoint.id === api
+      );
       targetEndpoint = endpoint;
 
       if (Object.keys(endpoint.headers).length > 0) {
         headers = endpoint.headers;
-      };    
-
+      }
     } else {
       targetEndpoint = api;
-      if(api.headers) {
+      if (api.headers) {
         headers = api.headers;
-      };      
-    };
-        
+      }
+    }
+
     for (const entry of data) {
       const apiCall = await fetch(targetEndpoint.url, {
         method: targetEndpoint.method,
         headers,
-        body: JSON.stringify(entry)
+        body: JSON.stringify(entry),
       });
 
       const callData = await apiCall.json();
       result.push(callData);
-    };
-   
-    if (result) return result; 
-   
-    throw new Errors.DataMakerError(
-      "Something went wrong."
-    );      
-  };
+    }
+
+    if (result) return result;
+
+    throw new Errors.DataMakerError("Something went wrong.");
+  }
 
   /**
    * Export data to database saved in your Datamaker account. In parameters provide with DB Bridge connection ID,
    * name of database table to export data into and with data to be exported.
-   * @param connectionId 
-   * @param tableName 
-   * @param data 
-   * @returns 
+   * @param connectionId
+   * @param tableName
+   * @param data
+   * @returns
    */
   async exportToDB(connectionId: string, tableName: string, data: object[]) {
     try {
       // Fetch connection details
-      const fetchConnection = await fetch(`${this.options.baseURL}/connections`, {
-        method: "GET",
-        headers: this.headers
-      });
+      const fetchConnection = await fetch(
+        `${this.options.baseURL}/connections`,
+        {
+          method: "GET",
+          headers: this.headers,
+        }
+      );
 
       if (!fetchConnection.ok) {
         throw new Errors.DataMakerError("Failed to fetch connection details.");
-      };
+      }
 
       const connectionsData = await fetchConnection.json();
-      const connection = connectionsData.find((db: Data) => db.id === connectionId);
+      const connection = connectionsData.find(
+        (db: Data) => db.id === connectionId
+      );
 
       if (!connection) {
         throw new Errors.DataMakerError("Connection not found.");
-      };
+      }
 
       // Test connection
-      const testBody: { connectionString: string, type: string } = {
+      const testBody: { connectionString: string; type: string } = {
         connectionString: connection.connectionString,
-        type: connection.type
+        type: connection.type,
       };
 
-      const testConnection = await fetch(`${this.options.baseURL}/connections/test`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(testBody)
-      });
+      const testConnection = await fetch(
+        `${this.options.baseURL}/connections/test`,
+        {
+          method: "POST",
+          headers: this.headers,
+          body: JSON.stringify(testBody),
+        }
+      );
 
       if (testConnection.status !== 200) {
-        throw new Errors.DataMakerError(
-          "Your connection is not working."
-        );
-      };  
-      
+        throw new Errors.DataMakerError("Your connection is not working.");
+      }
+
       // Loop through each entry in the data array and construct values to be pushed to DB
       let values: string[] = [];
 
       for (const entry of data) {
-        const entryValues = Object.values(entry).map(value => `'${value}'`).join(", ");
+        const entryValues = Object.values(entry)
+          .map((value) => `'${value}'`)
+          .join(", ");
         values.push(`(${entryValues})`);
-      };
+      }
 
       const body: DBQuery = {
         connectionId: connection.id,
-        query: `INSERT INTO "${tableName}" (${Object.keys(data[0]!).map(key => `"${key}"`).join(", ")}) VALUES ${values.join(", ")};`
+        query: `INSERT INTO "${tableName}" (${Object.keys(data[0]!)
+          .map((key) => `"${key}"`)
+          .join(", ")}) VALUES ${values.join(", ")};`,
       };
 
       // Push to DB
       const push = await fetch(`${this.options.baseURL}/export/db`, {
         method: "POST",
         headers: this.headers,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       if (!push.ok) {
         throw new Errors.DataMakerError("Failed to export data to DB.");
-      };
+      }
 
       const pushData = await push.json();
       return pushData;
-
-  } catch (error) {
+    } catch (error) {
       console.log(error);
       throw error;
-    };
-  };
+    }
+  }
+
+  /**
+   * Get all projects.
+   * @returns A list of all projects available to the authenticated user.
+   */
+  async getProjects() {
+    const response = await fetch(`${this.options.baseURL}/projects`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to fetch projects: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Create a new project.
+   * @param project - Object containing project details (name and teamId are required).
+   * @returns The newly created project.
+   */
+  async createProject(project: {
+    name: string;
+    teamId: string;
+    id?: string;
+    avatar?: string;
+    description?: string;
+  }) {
+    const response = await fetch(`${this.options.baseURL}/projects`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(project),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to create project: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get a project by ID.
+   * @param id - The ID of the project to fetch.
+   * @returns The project with the specified ID.
+   */
+  async getProjectById(id: string) {
+    if (!id) {
+      throw new Errors.DataMakerError("Project ID is required.");
+    }
+
+    const response = await fetch(`${this.options.baseURL}/projects/${id}`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to fetch project: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Update an existing project.
+   * @param id - The ID of the project to update.
+   * @param updates - Fields to update: name and teamId are required.
+   * @returns The updated project.
+   */
+  async updateProject(
+    id: string,
+    updates: {
+      name: string;
+      teamId: string;
+      avatar?: string;
+      description?: string;
+    }
+  ) {
+    if (!id) {
+      throw new Errors.DataMakerError("Project ID is required to update.");
+    }
+
+    const response = await fetch(`${this.options.baseURL}/projects/${id}`, {
+      method: "PUT",
+      headers: this.headers,
+      body: JSON.stringify({ ...updates, id }),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to update project: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Delete a project by its ID.
+   * @param id - The ID of the project to delete.
+   * @returns A success message or status.
+   */
+  async deleteProject(id: string) {
+    if (!id) {
+      throw new Errors.DataMakerError("Project ID is required to delete.");
+    }
+
+    const response = await fetch(`${this.options.baseURL}/projects/${id}`, {
+      method: "DELETE",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to delete project: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
 };
 
 export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint, Data };
