@@ -103,6 +103,7 @@ class DataMaker {
     this.headers = {
       "Content-Type": "application/json",
       Authorization: `${this.apiKey}`,
+      "X-API-KEY": `${this.apiKey}`,
       ...this.options.defaultHeaders,
     };
   }
