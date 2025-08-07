@@ -247,3 +247,35 @@ test("Create team (logged in user )", async () => {
 
 });
 
+test("Update team (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+
+  // Create a unique team name
+  const uniqueName = `Automators AI Team ${Date.now()}`;
+
+  const createdTeam = await datamaker.createTeam({
+    name: uniqueName,
+    avatar: "https://example.com/avatar.png",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+
+  expect(createdTeam?.id).toBeDefined();
+
+  // Prepare updated team data
+  const updatedTeam = {
+    name: `Updated ${uniqueName}`,
+    avatar: "https://example.com/new-avatar.png",
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Update the team using the created ID
+  const result = await datamaker.updateTeam(createdTeam.id, updatedTeam);
+
+  expect(result?.id).toEqual(createdTeam.id);
+  expect(result?.name).toEqual(updatedTeam.name);
+  expect(result?.avatar).toEqual(updatedTeam.avatar);
+  expect(result?.updatedAt).toBeDefined();
+
+});
+
