@@ -294,3 +294,90 @@ test("Delete team (logged in user )", async () => {
 
   expect(result?.message).toBeDefined();
 });
+
+test("Fetch all projects (logged in user)", async () => {
+  const datamaker = new DataMaker({});
+  const result = await datamaker.getProjects();
+
+  expect(result[0]?.id).toBeDefined();
+  expect(result[0]?.name).toBeDefined();
+  expect(result[0]?.avatar).toBeDefined();
+  expect(result[0]?.description).toBeDefined();
+  expect(result[0]?.createdAt).toBeDefined();
+  expect(result[0]?.createdBy).toBeDefined();
+  expect(result[0]?.teamId).toBeDefined();
+});
+
+test("Create project (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+  const uniqueProjectName = `AI Templates Project ${Date.now()}`;
+
+  const newProject = {
+    name: uniqueProjectName,
+    teamId: "team_123456",
+    description: "Project for testing SDK integration",
+    avatar: "https://example.com/avatar.png",
+  };
+  const result = await datamaker.createProject(newProject);
+
+  expect(result?.id).toBeDefined();
+  expect(result?.name).equal(newProject.name);
+  expect(result?.description).equal(newProject.description);
+  expect(result?.avatar).toBeDefined();
+  expect(result?.createdAt).toBeDefined();
+  expect(result?.createdBy).toBeDefined();
+  expect(result?.teamId).toBeDefined();
+});
+
+test("Update project (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+
+  // Create a project with a unique  name
+  const uniqueProjectName = `AI Templates Project ${Date.now()}`;
+
+  const newProject = {
+    name: uniqueProjectName,
+    teamId: "team_123456",
+    description: "Project for testing SDK integration",
+    avatar: "https://example.com/avatar.png",
+  };
+  const createdProject = await datamaker.createProject(newProject);
+
+  expect(createdProject?.id).toBeDefined();
+
+  // Prepare updated team data
+  const updates = {
+    name: `Updated ${uniqueProjectName}`,
+    description: "Updated description",
+    teamId: `${createdProject?.teamId}`,
+  };
+
+  // Update the project using the created project ID
+  const result = await datamaker.updateProject(createdProject?.id, updates);
+
+  expect(result?.id).toEqual(createdProject.id);
+  expect(result?.name).toEqual(updates.name);
+  expect(result?.description).toEqual(updates.description);
+  expect(result?.teamId).toEqual(updates.teamId);
+});
+
+test("Delete project (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+
+  const uniqueProjectName = `Project to delete ${Date.now()}`;
+
+  const newProject = {
+    name: uniqueProjectName,
+    teamId: "team_123456",
+    description: "Project for testing SDK integration",
+    avatar: "https://example.com/avatar.png",
+  };
+
+  const createdProject = await datamaker.createProject(newProject);
+
+  expect(createdProject?.id).toBeDefined();
+
+  const result = await datamaker.deleteProject(createdProject.id);
+
+  expect(result?.message).toBeDefined();
+});
