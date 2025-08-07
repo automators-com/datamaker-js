@@ -429,6 +429,27 @@ class DataMaker {
     return response.json();
   }
 
+  // ==================== TEMPLATES ENDPOINTS =========================
+
+  /**
+   * Get all user templates.
+   * @returns A list of all templates available to the authenticated user.
+   */
+  async getTemplates() {
+    const response = await fetch(`${this.options.baseURL}/templates`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to fetch templates: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
   // ==================== TEAMS ENDPOINTS =========================
 
   /**
