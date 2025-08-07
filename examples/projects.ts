@@ -3,8 +3,7 @@ import { DataMaker } from "../src/index";
 const datamaker = new DataMaker({});
 
 const fetchProjects = async () => {
-  const response = await datamaker.getProjects();
-  const projects = await response.json();
+  const projects = await datamaker.getProjects();
   console.log("All Projects:", projects);
 };
 
@@ -18,8 +17,7 @@ const createNewProject = async () => {
     avatar: "https://example.com/avatar.png",
   };
 
-  const response = await datamaker.createProject(newProject);
-  const project = await response.json();
+  const project = await datamaker.createProject(newProject);
   console.log("Created Project:", project);
 };
 
@@ -28,8 +26,7 @@ createNewProject();
 const fetchProjectById = async () => {
   const projectId = "project_abc123";
 
-  const response = await datamaker.getProjectById(projectId);
-  const project = await response.json();
+  const project = await datamaker.getProjectById(projectId);
   console.log("Project by ID:", project);
 };
 
@@ -44,8 +41,7 @@ const updateExistingProject = async () => {
     description: "Updated description via SDK",
   };
 
-  const response = await datamaker.updateProject(projectId, updates);
-  const updated = await response.json();
+  const updated = await datamaker.updateProject(projectId, updates);
   console.log("Updated Project:", updated);
 };
 
@@ -54,8 +50,7 @@ updateExistingProject();
 const removeProject = async () => {
   const projectId = "project_abc123";
 
-  const response = await datamaker.deleteProject(projectId);
-  const result = await response.json();
+  const result = await datamaker.deleteProject(projectId);
   console.log("Delete Result:", result);
 };
 
