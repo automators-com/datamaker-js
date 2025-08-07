@@ -217,16 +217,15 @@ test("Export generated data into DB saved in account", async () => {
 
 test("Fetch all teams (logged in user)", async () => {
   const datamaker = new DataMaker({});
-  const result = await datamaker.getTeams()
+  const result = await datamaker.getTeams();
 
   expect(result[0]?.id).toBeDefined();
   expect(result[0]?.name).toBeDefined();
   expect(result[0]?.avatar).toBeDefined();
   expect(result[0]?.Projects).toBeTypeOf("object");
-  expect(result[0]?.Users).toBeTypeOf('object');
+  expect(result[0]?.Users).toBeTypeOf("object");
   expect(result[0]?.createdAt).toBeDefined();
   expect(result[0]?.updatedAt).toBeDefined();
-
 });
 
 test("Create team (logged in user )", async () => {
@@ -244,7 +243,6 @@ test("Create team (logged in user )", async () => {
   expect(result?.avatar).toBeDefined();
   expect(result?.createdAt).toBeDefined();
   expect(result?.updatedAt).toBeDefined();
-
 });
 
 test("Update team (logged in user )", async () => {
@@ -276,6 +274,23 @@ test("Update team (logged in user )", async () => {
   expect(result?.name).toEqual(updatedTeam.name);
   expect(result?.avatar).toEqual(updatedTeam.avatar);
   expect(result?.updatedAt).toBeDefined();
-
 });
 
+test("Delete team (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+
+  // Create team with unique name
+  const uniqueName = `Delete Team ${Date.now()}`;
+  const createdTeam = await datamaker.createTeam({
+    name: uniqueName,
+    avatar: "https://example.com/avatar.png",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+
+  expect(createdTeam?.id).toBeDefined();
+
+  const result = await datamaker.deleteTeam(createdTeam.id);
+
+  expect(result?.message).toBeDefined();
+});
