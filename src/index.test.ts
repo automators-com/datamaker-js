@@ -229,3 +229,21 @@ test("Fetch all teams (logged in user)", async () => {
 
 });
 
+test("Create team (logged in user )", async () => {
+  const datamaker = new DataMaker({});
+  const newTeam = {
+    name: "Automators AI Team",
+    avatar: "https://example.com/avatar.png",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const result = await datamaker.createTeam(newTeam);
+
+  expect(result?.id).toBeDefined();
+  expect(result?.name).equal(newTeam.name);
+  expect(result?.avatar).toBeDefined();
+  expect(result?.createdAt).toBeDefined();
+  expect(result?.updatedAt).toBeDefined();
+
+});
+
