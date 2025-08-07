@@ -214,3 +214,18 @@ test("Export generated data into DB saved in account", async () => {
     expect(deleteData.id).toBe(entry.id);
   }
 });
+
+test("Fetch all teams (logged in user)", async () => {
+  const datamaker = new DataMaker({});
+  const result = await datamaker.getTeams()
+
+  expect(result[0]?.id).toBeDefined();
+  expect(result[0]?.name).toBeDefined();
+  expect(result[0]?.avatar).toBeDefined();
+  expect(result[0]?.Projects).toBeTypeOf("object");
+  expect(result[0]?.Users).toBeTypeOf('object');
+  expect(result[0]?.createdAt).toBeDefined();
+  expect(result[0]?.updatedAt).toBeDefined();
+
+});
+
