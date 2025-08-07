@@ -381,3 +381,15 @@ test("Delete project (logged in user )", async () => {
 
   expect(result?.message).toBeDefined();
 });
+
+test("Fetch all logged in user templates", async () => {
+  const datamaker = new DataMaker({});
+  const result = await datamaker.getTemplates();
+
+  expect(result[0]?.id).toBeDefined();
+  expect(result[0]?.name).toBeDefined();
+  expect(result[0]?.createdAt).toBeDefined();
+  expect(result[0]?.createdBy).toBeDefined();
+  expect(result[0]?.projectId).toBeDefined();
+  expect(result[0]?.teamId).toBeDefined();
+});
