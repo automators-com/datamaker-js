@@ -474,7 +474,7 @@ class DataMaker {
   /**
    * Create a new template.
    * @param data - Object that satisfies type CreateTemplateRequest.
-   * @returns 
+   * @returns
    */
   async createTemplate(data: CreateTemplateRequest) {
     const response = await fetch(`${this.options.baseURL}/templates`, {

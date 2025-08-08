@@ -1,6 +1,6 @@
 import { DataMaker } from "./index";
 import { expect, test } from "vitest";
-import { CustomEndpoint, Data } from "./template";
+import { CreateTemplateRequest, CustomEndpoint, Data } from "./template";
 
 const baseUrl = "https://cloud.datamaker.app/api";
 
@@ -314,7 +314,7 @@ test("Create project (logged in user )", async () => {
 
   const newProject = {
     name: uniqueProjectName,
-    teamId: "team_123456",
+    teamId: "cme1bbe8k000cr5dp62cd5lab",
     description: "Project for testing SDK integration",
     avatar: "https://example.com/avatar.png",
   };
@@ -337,7 +337,7 @@ test("Update project (logged in user )", async () => {
 
   const newProject = {
     name: uniqueProjectName,
-    teamId: "team_123456",
+    teamId: "cme1bbe8k000cr5dp62cd5lab",
     description: "Project for testing SDK integration",
     avatar: "https://example.com/avatar.png",
   };
@@ -368,7 +368,7 @@ test("Delete project (logged in user )", async () => {
 
   const newProject = {
     name: uniqueProjectName,
-    teamId: "team_123456",
+    teamId: "cme1bbe8k000cr5dp62cd5lab",
     description: "Project for testing SDK integration",
     avatar: "https://example.com/avatar.png",
   };
@@ -392,4 +392,43 @@ test("Fetch all logged in user templates", async () => {
   expect(result[0]?.createdBy).toBeDefined();
   expect(result[0]?.projectId).toBeDefined();
   expect(result[0]?.teamId).toBeDefined();
+});
+
+test("Create new template (logged in user)", async () => {
+  const datamaker = new DataMaker({});
+
+  const uniqueName = `New Template ${Date.now()}`;
+  const templateData = {
+    name: uniqueName,
+    projectId: "cme1bb331000br5dpl7pelvul",
+    teamId: "cme1akhyp0000r5dplpyugis7",
+    fields: [
+      {
+        name: "location",
+        active: true,
+        type: "Address",
+        options: { useFullAddress: true },
+      },
+      {
+        name: "productCategory",
+        type: "Mapped",
+        active: true,
+        options: {
+          field: "department",
+          map: { Electronics: "Tech", Shoes: "Fashion" },
+        },
+      },
+    ],
+  } satisfies CreateTemplateRequest;
+
+  const result = await datamaker.createTemplate(templateData);
+
+  expect(result?.id).toBeDefined();
+  expect(result?.name).toEqual(uniqueName);
+  expect(result?.projectId).toEqual(templateData.projectId);
+  expect(result?.teamId).toEqual(templateData.teamId);
+  expect(result?.fields).toBeTypeOf('object');
+  expect(result?.createdAt).toBeDefined();
+  expect(result?.createdBy).toBeDefined();
+ 
 });

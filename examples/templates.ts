@@ -31,9 +31,9 @@ fetchTemplateById()
 const createTemplate = async () => {
 
   const templateData = {
-    name: "New Template",
-    projectId: "project_1234",
-    teamId: "team_3456",
+    name: "New Template 1234",
+    projectId: "cme1bb331000br5dpl7pelvul",
+    teamId: "cme1akhyp0000r5dplpyugis7",
     fields: [
       {
         name: "username",
@@ -93,7 +93,7 @@ const createTemplate = async () => {
       },
     ],
   } satisfies CreateTemplateRequest;
-  
+
   const template = await datamaker.createTemplate(templateData);
 
   console.log("Created Template", template);
@@ -106,13 +106,13 @@ createTemplate()
 // ----------------------
 // Delete existing template by ID
 // ----------------------
-// const deleteTemplateById = async () => {
-//   const templateID = "template_12345";
-//   const template = await datamaker.deleteTemplate(templateID);
+const deleteTemplateById = async () => {
+  const templateID = "template_12345";
+  const template = await datamaker.deleteTemplate(templateID);
 
-//   console.log("Template by ID:", template);
-// };
+  console.log("Template by ID:", template);
+};
 
-// deleteTemplateById()
+deleteTemplateById()
 
 
