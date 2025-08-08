@@ -374,6 +374,11 @@ type DataMakerField =
 
 export type Fields = DataMakerField[];
 
+type AddActive<T> = T & { active: boolean };
+type withActive = AddActive<DataMakerField>;
+
+export type FieldsWithActive = withActive[];
+
 export type Template = {
   name?: string;
   fields: Fields;
@@ -386,9 +391,9 @@ export type AccountTemplate = {
   fields: Fields;
   createdAt: string;
   createdBy: string;
-  templateFolderId: null,
+  templateFolderId: null;
   teamId: string;
-  seed: null
+  seed: null;
 };
 
 export type Endpoint = {
@@ -406,7 +411,7 @@ export type Endpoint = {
 
 export type Headers = {
   Authorization: string | undefined;
-  "Content-type": string;  
+  "Content-type": string;
   Credentials: string;
 };
 
@@ -420,6 +425,24 @@ export type CustomEndpoint = {
   headers?: object;
 };
 export type DBQuery = {
-  connectionId: string; 
+  connectionId: string;
   query: string;
+};
+
+export type SimulationConfig = {
+  period: number;
+  isSimulationVisible: boolean;
+};
+
+export type CreateTemplateRequest = {
+  name: string;
+  fields?: FieldsWithActive;
+  dbOrderIdx?: number;
+  createdAt?: string;
+  createdBy?: string;
+  projectId: string;
+  teamId: string;
+  simulationConfig?: SimulationConfig;
+  templateFolderId?: string | null;
+  seed?: number | null;
 };

@@ -7,6 +7,7 @@ import {
   CustomEndpoint,
   Data,
   DBQuery,
+  CreateTemplateRequest,
 } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
@@ -464,6 +465,27 @@ class DataMaker {
     if (!response.ok) {
       throw new Errors.DataMakerError(
         `Failed to fetch template by ID: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Create a new template.
+   * @param data - Object that satisfies type CreateTemplateRequest.
+   * @returns 
+   */
+  async createTemplate(data: CreateTemplateRequest) {
+    const response = await fetch(`${this.options.baseURL}/templates`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to create template: ${response.statusText}`
       );
     }
 
