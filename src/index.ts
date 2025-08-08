@@ -450,6 +450,26 @@ class DataMaker {
     return response.json();
   }
 
+  /**
+   * Get a template by its ID
+   * @param id - The ID of the template to retrieve.
+   * @returns The matching template
+   */
+  async getTemplateById(id: string) {
+    const response = await fetch(`${this.options.baseURL}/templates/${id}`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to fetch template by ID: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
   // ==================== TEAMS ENDPOINTS =========================
 
   /**
