@@ -7,8 +7,7 @@ import {
   CustomEndpoint,
   Data,
   DBQuery,
-  CreateTemplateRequest,
-  UpdateTemplateRequest,
+  CreateTemplateRequest
 } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
@@ -492,17 +491,22 @@ class DataMaker {
 
     return response.json();
   }
+
   /**
    * Update existing template.
-   * @param data - Object that satisfies type UpdateTemplateRequest.
+   * @param data - Object that satisfies type CreateTemplateRequest.
    * @returns
    */
-  async updateTemplate(data: UpdateTemplateRequest) {
-    const response = await fetch(`${this.options.baseURL}/templates`, {
+  async updateTemplate(id: string, data: CreateTemplateRequest) {
+    const response = await fetch(`${this.options.baseURL}/templates/${id}`, {
       method: "PUT",
       headers: this.headers,
       body: JSON.stringify(data),
     });
+
+    if (!id) {
+      throw new Errors.DataMakerError("Template ID is required for updates.");
+    }
 
     if (!response.ok) {
       throw new Errors.DataMakerError(

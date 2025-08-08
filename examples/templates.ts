@@ -26,7 +26,7 @@ const fetchTemplateById = async () => {
 fetchTemplateById()
 
 // ----------------------
-// Create a new template 
+// Create a new template
 // ----------------------
 const createTemplate = async () => {
 
@@ -101,7 +101,39 @@ const createTemplate = async () => {
 
 createTemplate()
 
+// ----------------------
+// Update existing template
+// ----------------------
+const updateTemplate = async () => {
+  const uniqueName = `Updated template ${Date.now()}`;
+  const templateId = "cme2snibd0018r5a862o8rlpp";
 
+  const updateData = {
+    name: uniqueName,
+    projectId: "cme1bb331000br5dpl7pelvul",
+    teamId: "cme1akhyp0000r5dplpyugis7",
+    fields: [
+      {
+        name: "username",
+        active: true,
+        type: "Words",
+        options: { count: 2 },
+      },
+      {
+        name: "signupDate",
+        active: true,
+        type: "Date",
+        options: { format: "YYYY-MM-DD" },
+      },
+    ],
+  } satisfies CreateTemplateRequest;
+
+  const template = await datamaker.updateTemplate(templateId, updateData);
+
+  console.log("Update Template", template);
+};
+
+updateTemplate();
 
 // ----------------------
 // Delete existing template by ID
@@ -114,5 +146,3 @@ const deleteTemplateById = async () => {
 };
 
 deleteTemplateById()
-
-

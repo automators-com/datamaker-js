@@ -447,4 +447,3 @@ export type CreateTemplateRequest = {
   seed?: number | null;
 };
 
-export type UpdateTemplateRequest = CreateTemplateRequest & {id: string};
