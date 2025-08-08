@@ -24,4 +24,16 @@ const fetchTemplateById = async () => {
 
 fetchTemplateById()
 
+// ----------------------
+// Delete existing template by ID
+// ----------------------
+const deleteTemplateById = async () => {
+  const templateID = "template_12345";
+  const template = datamaker.deleteTemplate(templateID);
+
+  console.log("Template by ID:", template);
+};
+
+deleteTemplateById()
+
 

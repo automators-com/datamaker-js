@@ -470,6 +470,26 @@ class DataMaker {
     return response.json();
   }
 
+  /**
+   * Delete a template by its ID
+   * @param id - The ID of the template to delete.
+   * @returns - Success message
+   */
+  async deleteTemplate(id: string) {
+    const response = await fetch(`${this.options.baseURL}/templates/${id}`, {
+      method: "DELETE",
+      headers: this.headers,
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to delete template by ID: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+
   // ==================== TEAMS ENDPOINTS =========================
 
   /**
@@ -567,7 +587,7 @@ class DataMaker {
    *
    * @param id - The ID of the team to delete.
    *
-   * @returns
+   * @returns - Success message
    */
   async deleteTeam(id: string) {
     if (!id) {
