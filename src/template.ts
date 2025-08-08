@@ -446,3 +446,5 @@ export type CreateTemplateRequest = {
   templateFolderId?: string | null;
   seed?: number | null;
 };
+
+export type UpdateTemplateRequest = CreateTemplateRequest & {id: string};

@@ -8,6 +8,7 @@ import {
   Data,
   DBQuery,
   CreateTemplateRequest,
+  UpdateTemplateRequest,
 } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
@@ -486,6 +487,26 @@ class DataMaker {
     if (!response.ok) {
       throw new Errors.DataMakerError(
         `Failed to create template: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  }
+  /**
+   * Update existing template.
+   * @param data - Object that satisfies type UpdateTemplateRequest.
+   * @returns
+   */
+  async updateTemplate(data: UpdateTemplateRequest) {
+    const response = await fetch(`${this.options.baseURL}/templates`, {
+      method: "PUT",
+      headers: this.headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to update template: ${response.statusText}`
       );
     }
 
