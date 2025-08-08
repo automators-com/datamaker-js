@@ -17,7 +17,7 @@ fetchTemplates();
 // ----------------------
 const fetchTemplateById = async () => {
   const templateID = "template_12345";
-  const template = datamaker.getTemplateById(templateID);
+  const template = await datamaker.getTemplateById(templateID);
 
   console.log("Template by ID:", template);
 };
@@ -29,7 +29,7 @@ fetchTemplateById()
 // ----------------------
 const deleteTemplateById = async () => {
   const templateID = "template_12345";
-  const template = datamaker.deleteTemplate(templateID);
+  const template = await datamaker.deleteTemplate(templateID);
 
   console.log("Template by ID:", template);
 };
