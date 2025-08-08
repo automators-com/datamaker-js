@@ -2,6 +2,9 @@ import { DataMaker } from "../src/index";
 
 const datamaker = new DataMaker({});
 
+// ----------------------
+// Fetch all teams
+// ----------------------
 const getAllTeams = async () => {
   const teams = await datamaker.getTeams();
   console.log("Teams:", teams);
@@ -9,6 +12,10 @@ const getAllTeams = async () => {
 
 getAllTeams();
 
+
+// ----------------------
+// Create a new team
+// ----------------------
 const createTeam = async () => {
   const team = await datamaker.createTeam({
     name: "Automators AI Team",
@@ -22,6 +29,9 @@ const createTeam = async () => {
 
 createTeam();
 
+// ----------------------
+// Update existing team
+// ----------------------
 const updateTeam = async () => {
   const teamId = "team_12345";
 
@@ -36,6 +46,9 @@ const updateTeam = async () => {
 
 updateTeam();
 
+// ----------------------
+// Delete a team
+// ----------------------
 const deleteTeam = async () => {
   const teamId = "team_12345";
 
