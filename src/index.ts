@@ -7,7 +7,8 @@ import {
   CustomEndpoint,
   Data,
   DBQuery,
-  CreateTemplateRequest
+  CreateTemplateRequest,
+  CreateConnectionRequest
 } from "./template";
 import * as Errors from "./error";
 import { readEnv } from "./utils";
@@ -791,6 +792,29 @@ class DataMaker {
     if (!response.ok) {
       throw new Errors.DataMakerError(
         `Failed to delete team member with ID: ${id}`
+      );
+    }
+
+    return response.json();
+  }
+
+  // ======================= CONNECTION ENDPOINTS =========================
+
+  /**
+   * Create a new connection.
+   * @param connection - Object satisfies CreateConnectionRequest.
+   * @returns The newly created connection.
+   */
+  async createConnection(connection: CreateConnectionRequest) {
+    const response = await fetch(`${this.options.baseURL}/connections`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(connection),
+    });
+
+    if (!response.ok) {
+      throw new Errors.DataMakerError(
+        `Failed to create connection: ${response.statusText}`
       );
     }
 

@@ -447,3 +447,16 @@ export type CreateTemplateRequest = {
   seed?: number | null;
 };
 
+type DBTypes = "db2" | "postgresql" | "mysql" | "mssql" | "mongodb" | "oracle";
+
+export type CreateConnectionRequest = {
+  id?: string;
+  name: string;
+  type: DBTypes;
+  connectionString: string;
+  readOnly?: boolean;
+  createdBy: string;
+  endpointFolderId?: string | null;
+  projectId: string;
+  teamId: string;
+};
