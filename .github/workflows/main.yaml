@@ -11,18 +11,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint && pnpm run build
+
+      # The types in src/generated are produced from spec/openapi.json. Stale
+      # or hand-edited types mean the SDK describes an API that has moved on,
+      # which is exactly how this package fell 2.5 years behind. Fail here
+      # rather than discover it from a customer.
+      - name: Generated types match the spec
+        run: pnpm run generate:check
+
+      - run: pnpm run lint
       - run: pnpm run test
-        env:
-          DATAMAKER_API_KEY: ${{ secrets.DATAMAKER_API_KEY }}
-          DEV_ACCOUNT_API: ${{secrets.DEV_ACCOUNT_API}}
+      - run: pnpm run build
