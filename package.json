@@ -4,6 +4,7 @@
   "author": "Automators <office@automators.com>",
   "license": "MIT",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.33.0",
   "homepage": "https://github.com/automators-com/datamaker-js",
   "bugs": "https://github.com/automators-com/datamaker-js/issues",
   "main": "dist/index.cjs",
