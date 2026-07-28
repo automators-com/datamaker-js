@@ -1,5 +1,11 @@
 # @automators/datamaker
 
+## 1.0.0
+
+### Major Changes
+
+- 3803e44: Rebuild the SDK from the API's OpenAPI document. Types are generated rather than hand-written, and the client covers projects, templates, sets, keymaps, masking policies and plans instead of only generate/export.
+
 ## 0.2.0
 
 ### Minor Changes
