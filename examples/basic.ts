@@ -1,34 +1,34 @@
-import { DataMaker } from "../src/index";
-import { Template } from "../src/template";
+/**
+ * The shortest useful thing: save a set, then read it back.
+ *
+ * Run with: DATAMAKER_API_KEY=... npx tsx examples/basic.ts
+ */
+import { DataMaker, DataMakerError } from "../src/index.js";
 
-const datamaker = new DataMaker({});
+const dm = new DataMaker();
 
-const generateData = async () => {
-  const template = {
-    name: "basic template",
-    quantity: 2,
-    fields: [
-      {
-        name: "first_name",
-        type: "First Name",
-      },
-      {
-        name: "last_name",
-        type: "Last Name",
-      },
-      {
-        name: "email",
-        type: "Derived",
-        options: {
-          value: "{{first_name}}.{{last_name}}@automators.com",
-        },
-      },
-    ],
-  } satisfies Template;
-  
-  const data = await datamaker.generate(template);
-  const result = await data.json();
-  console.log(result);   
-};
+const saved = await dm.sets.save({
+  name: `example-${Date.now()}`,
+  description: "Written by examples/basic.ts",
+  data: [
+    { id: 1, name: "Ada Lovelace", email: "ada@example.com" },
+    { id: 2, name: "Alan Turing", email: "alan@example.com" },
+  ],
+});
 
-generateData();
+console.log(`saved set ${saved.id} with ${saved.rowCount} rows`);
+
+// The detail endpoint carries `createdByName`, which the list does not.
+const detail = await dm.sets.get(saved.id);
+console.log(`created by: ${detail.createdByName ?? "an API key, not a user"}`);
+
+try {
+  await dm.sets.delete(saved.id);
+  console.log("cleaned up");
+} catch (error) {
+  if (error instanceof DataMakerError && error.status === 409) {
+    console.log("the set is locked; unlock it before deleting");
+  } else {
+    throw error;
+  }
+}

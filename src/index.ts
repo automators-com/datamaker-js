@@ -1,282 +1,64 @@
-import { DefaultQuery, Fetch } from "./core";
-import { AccountTemplate, Fields, Template, Endpoint, CustomEndpoint, Data, DBQuery } from "./template";
-import * as Errors from "./error";
-import { readEnv } from "./utils";
-import { fetchDatamaker } from "./utils";
+/**
+ * The official TypeScript client for the DataMaker API.
+ *
+ * ```ts
+ * import { DataMaker } from "@automators/datamaker";
+ *
+ * const dm = new DataMaker({ apiKey: process.env.DATAMAKER_API_KEY });
+ *
+ * const sets = await dm.sets.list();
+ * const set = await dm.sets.save({ name: "golden customers", data: rows });
+ * const { mappings, missing } = await dm.keymaps.lookup({
+ *   mapName: "sap-material-migration",
+ *   object: "Material",
+ *   oldKeys: ["OLD-1", "OLD-2"],
+ * });
+ * ```
+ *
+ * Types come from the API's own OpenAPI document, generated into
+ * `src/generated/schema.ts`. They are not hand-maintained, which is the fix
+ * for how this package fell 2.5 years behind the API.
+ */
+import { HttpClient, type ClientOptions } from "./core.js";
+import {
+  KeyMapsClient,
+  MaskingPoliciesClient,
+  PlansClient,
+  ProjectsClient,
+  SetsClient,
+  TemplatesClient,
+} from "./resources.js";
 
-interface ClientOptions {
-  /**
-   * Defaults to process.env['DATAMAKER_API_KEY'].
-   */
-  apiKey?: string;
+export class DataMaker {
+  /** The transport, exposed for endpoints the typed resources do not cover yet. */
+  readonly http: HttpClient;
 
-  /**
-   * Override the default base URL for the API, e.g., "https://Core.example.com/v2/"
-   */
-  baseURL?: string;
+  readonly projects: ProjectsClient;
+  readonly templates: TemplatesClient;
+  readonly sets: SetsClient;
+  readonly keymaps: KeyMapsClient;
+  readonly maskingPolicies: MaskingPoliciesClient;
+  readonly plans: PlansClient;
 
-  /**
-   * The maximum amount of time (in milliseconds) that the client should wait for a response
-   * from the server before timing out a single request.
-   *
-   * Note that request timeouts are retried by default, so in a worst-case scenario you may wait
-   * much longer than this timeout before the promise succeeds or fails.
-   */
-  timeout?: number;
-
-  /**
-   * Specify a custom `fetch` function implementation.
-   *
-   * If not provided, we use `node-fetch` on Node.js and otherwise expect that `fetch` is
-   * defined globally.
-   */
-  fetch?: Fetch | undefined;
-
-  /**
-   * The maximum number of times that the client will retry a request in case of a
-   * temporary failure, like a network error or a 5XX error from the server.
-   *
-   * @default 2
-   */
-  maxRetries?: number;
-
-  /**
-   * Default headers to include with every request to the Core.
-   *
-   * These can be removed in individual requests by explicitly setting the
-   * header to `undefined` or `null` in request options.
-   */
-  defaultHeaders?: HeadersInit;
-
-  /**
-   * Default query parameters to include with every request to the Core.
-   *
-   * These can be removed in individual requests by explicitly setting the
-   * param to `undefined` in request options.
-   */
-  defaultQuery?: DefaultQuery;
+  constructor(options: ClientOptions = {}) {
+    this.http = new HttpClient(options);
+    this.projects = new ProjectsClient(this.http);
+    this.templates = new TemplatesClient(this.http);
+    this.sets = new SetsClient(this.http);
+    this.keymaps = new KeyMapsClient(this.http);
+    this.maskingPolicies = new MaskingPoliciesClient(this.http);
+    this.plans = new PlansClient(this.http);
+  }
 }
 
-// create datamaker class object
-class DataMaker {
-  readonly apiKey: string;
-  headers: HeadersInit;
-  options: ClientOptions;
+export {
+  HttpClient,
+  DataMakerError,
+  MissingApiKeyError,
+  DEFAULT_BASE_URL,
+} from "./core.js";
+export type { ClientOptions, RequestOptions, ApiErrorBody } from "./core.js";
+export * from "./resources.js";
+export type { components, paths } from "./generated/schema.js";
 
-  /**
-   * API Client for interfacing with the DataMaker Core.
-   *
-   * @param {string} [opts.apiKey==process.env['DATAMAKER_API_KEY'] ?? undefined]
-   * @param {string} [opts.baseURL] - Override the default base URL for the Core.
-   * @param {number} [opts.timeout=10 minutes] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
-   * @param {number} [opts.httpAgent] - An HTTP agent used to manage HTTP(s) connections.
-   * @param {Core.Fetch} [opts.fetch] - Specify a custom `fetch` function implementation.
-   * @param {number} [opts.maxRetries=2] - The maximum number of times the client will retry a request.
-   * @param {Core.Headers} opts.defaultHeaders - Default headers to include with every request to the Core.
-   * @param {Core.DefaultQuery} opts.defaultQuery - Default query parameters to include with every request to the Core.
-   */
-  constructor({
-    apiKey = readEnv("DATAMAKER_API_KEY"),
-    ...opts
-  }: ClientOptions = {}) {
-    if (apiKey === undefined) {
-      throw new Errors.DataMakerError(
-        "The DATAMAKER_API_KEY environment variable is missing or empty; either provide it, or instantiate the OpenAI client with an apiKey option, like new DataMaker({ apiKey: 'My API Key' })."
-      );
-    }
-    const options: ClientOptions = {
-      apiKey,
-      ...opts,
-      baseURL: opts.baseURL ?? `https://cloud.datamaker.app/api`,
-    };
-
-    this.apiKey = apiKey;
-    this.options = options;
-    this.headers = {
-      "Content-Type": "application/json",
-      Authorization: `${this.apiKey}`,
-      ...this.options.defaultHeaders,
-    };
-  };
-  /**
-   * Generate data from custom template.
-   * @param template 
-   * @returns 
-   */
-  async generate(template: Template) {
-    if (!template) {
-      throw new Errors.DataMakerError(
-        "You must provide a template to generate data."
-      );
-    };
-
-    if (!template.quantity) {
-      template.quantity = 1;
-    };   
-    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json(); 
-  };
-  /**
-   * Generate data using template from you Datamaker account. As arguments provide ID of a template from your account and a number of entries to be generated.
-   * Requires Datamaker api key to be defined in your project.
-   * @param templateId 
-   * @param quantity 
-   * @returns 
-   */
-  async generateFromTemplateId(templateId: string, quantity: number = 1) {        
-    const url = `${this.options.baseURL}/templates`;
-
-    const fetchTemplate = await fetch(url, {
-      method: "GET",
-        headers: this.headers
-    });
-
-    const templateData = await fetchTemplate.json();
-    let template = templateData.find((temp: AccountTemplate) => temp.id === templateId);
-  
-    if (!templateData) {
-      throw new Errors.DataMakerError(
-        "No templates found in your account."
-      );
-    };
-    
-    if (!template) {
-      throw new Errors.DataMakerError(
-        "You must provide ID of a template from your account."
-      );
-    };
-  
-    template.quantity = quantity;
-    return (await fetchDatamaker(this.options.baseURL, this.headers, template)).json();  
-  };
-  /**
-   * Send data to an endpoint. In parameters provide with endpoint compatible data as array of objects
-   * and with API endpoint either as ID of an endpoint from your account or as an object.
-   * @param api 
-   * @param data 
-   * @returns 
-   */
-  async exportToApi(api: string | CustomEndpoint, data: object[]) {  
-    const url = `${this.options.baseURL}/endpoints`;
-    let targetEndpoint: Endpoint | CustomEndpoint;
-    let result: Array<{}> = [];
-    let headers: any = this.headers;  
-
-    if (typeof api == "string") {
-      const fetchEnpoints = await fetch(url, {
-        method: "GET",
-        headers: this.headers
-      });
-  
-      const endpointData = await fetchEnpoints.json();
-      const endpoint = endpointData.find((endpoint: Endpoint) => endpoint.id === api);
-      targetEndpoint = endpoint;
-
-      if (Object.keys(endpoint.headers).length > 0) {
-        headers = endpoint.headers;
-      };    
-
-    } else {
-      targetEndpoint = api;
-      if(api.headers) {
-        headers = api.headers;
-      };      
-    };
-        
-    for (const entry of data) {
-      const apiCall = await fetch(targetEndpoint.url, {
-        method: targetEndpoint.method,
-        headers,
-        body: JSON.stringify(entry)
-      });
-
-      const callData = await apiCall.json();
-      result.push(callData);
-    };
-   
-    if (result) return result; 
-   
-    throw new Errors.DataMakerError(
-      "Something went wrong."
-    );      
-  };
-
-  /**
-   * Export data to database saved in your Datamaker account. In parameters provide with DB Bridge connection ID,
-   * name of database table to export data into and with data to be exported.
-   * @param connectionId 
-   * @param tableName 
-   * @param data 
-   * @returns 
-   */
-  async exportToDB(connectionId: string, tableName: string, data: object[]) {
-    try {
-      // Fetch connection details
-      const fetchConnection = await fetch(`${this.options.baseURL}/connections`, {
-        method: "GET",
-        headers: this.headers
-      });
-
-      if (!fetchConnection.ok) {
-        throw new Errors.DataMakerError("Failed to fetch connection details.");
-      };
-
-      const connectionsData = await fetchConnection.json();
-      const connection = connectionsData.find((db: Data) => db.id === connectionId);
-
-      if (!connection) {
-        throw new Errors.DataMakerError("Connection not found.");
-      };
-
-      // Test connection
-      const testBody: { connectionString: string, type: string } = {
-        connectionString: connection.connectionString,
-        type: connection.type
-      };
-
-      const testConnection = await fetch(`${this.options.baseURL}/connections/test`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(testBody)
-      });
-
-      if (testConnection.status !== 200) {
-        throw new Errors.DataMakerError(
-          "Your connection is not working."
-        );
-      };  
-      
-      // Loop through each entry in the data array and construct values to be pushed to DB
-      let values: string[] = [];
-
-      for (const entry of data) {
-        const entryValues = Object.values(entry).map(value => `'${value}'`).join(", ");
-        values.push(`(${entryValues})`);
-      };
-
-      const body: DBQuery = {
-        connectionId: connection.id,
-        query: `INSERT INTO "${tableName}" (${Object.keys(data[0]!).map(key => `"${key}"`).join(", ")}) VALUES ${values.join(", ")};`
-      };
-
-      // Push to DB
-      const push = await fetch(`${this.options.baseURL}/export/db`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(body)
-      });
-
-      if (!push.ok) {
-        throw new Errors.DataMakerError("Failed to export data to DB.");
-      };
-
-      const pushData = await push.json();
-      return pushData;
-
-  } catch (error) {
-      console.log(error);
-      throw error;
-    };
-  };
-};
-
-export { DataMaker, ClientOptions, Fields, Template, CustomEndpoint, Data };
+export default DataMaker;

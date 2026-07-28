@@ -3,19 +3,23 @@
   "description": "The official Node.js / Typescript library for the DataMaker API",
   "author": "Automators <office@automators.com>",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.33.0",
   "homepage": "https://github.com/automators-com/datamaker-js",
   "bugs": "https://github.com/automators-com/datamaker-js/issues",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "release": "pnpm run build && changeset publish",
-    "lint": "tsc",
-    "test": "vitest",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "generate": "openapi-typescript spec/openapi.json -o src/generated/schema.ts",
+    "generate:check": "node scripts/check-generated.mjs",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "changeset": "changeset "
+    "release": "pnpm run build && changeset publish",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
@@ -24,9 +28,36 @@
     "tsup": "^8.0.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.7",
-    "vitest": "^1.0.2"
+    "vitest": "^1.0.2",
+    "openapi-typescript": "^7.13.0"
   },
-  "dependencies": {
-    "dotenv": "^16.3.1"
+  "dependencies": {},
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "spec/openapi.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "datamaker",
+    "test-data",
+    "synthetic-data",
+    "automators",
+    "sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/automators-com/datamaker-js.git"
   }
 }
