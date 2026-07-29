@@ -2066,6 +2066,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenarios/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List active and recent scenario executions from the queue */
+        get: operations["getScenariosJobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/scenarios/jobs/{jobId}/cancel": {
         parameters: {
             query?: never;
@@ -3031,13 +3048,364 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddressAvailability: {
+            available: boolean;
+        };
         ApiError: {
             code?: string;
             details?: string;
             error: string;
         };
+        ApiKey: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            id: string;
+            /** @description The key value itself - secret */
+            key: string;
+            name: string;
+            projectId: string | null;
+            role: ("READ" | "READ_WRITE" | "SCENARIO") | string;
+            teamId: string | null;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+            userId: string | null;
+        };
+        ApiKeyValidation: {
+            message: string;
+        };
+        ApiMessageError: {
+            error?: string;
+            message: string;
+        };
+        ApprovalDecision: {
+            created?: boolean;
+            /** @enum {string} */
+            decision: "allow" | "pending";
+            id: string;
+        };
+        ApprovalStatus: {
+            id: string;
+            status: string;
+        };
+        AuditEvent: {
+            /** @enum {string} */
+            category: "READ" | "WRITE" | "DESTRUCTIVE" | "EXEC";
+            /** @description Correlation only; no FK, so audit survives chat deletion */
+            chatId: string | null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            /** @enum {string} */
+            decision: "AUTO" | "ALLOWED" | "DENIED" | "APPROVED";
+            durationMs: number | null;
+            error: string | null;
+            /** @description ISO-8601 timestamp */
+            finishedAt: string | null;
+            id: string;
+            /** @description Masked shape and hash of the arguments; never raw values */
+            inputDigest?: null;
+            /** @description Resolved server-side from the verified JWT */
+            principal: string | null;
+            projectId: string | null;
+            sdkSessionId: string | null;
+            /** @description ISO-8601 timestamp */
+            startedAt: string;
+            /** @enum {string} */
+            status: "ok" | "error";
+            targetKind: string | null;
+            targetRef: string | null;
+            teamId: string | null;
+            tool: string;
+            trackingId: string | null;
+        };
+        AuditEventRef: {
+            id: string;
+        };
+        BuiltinSkill: {
+            appliedCount: number;
+            by: string;
+            description: string;
+            enabled: boolean;
+            /** @description Prefixed "builtin:" */
+            id: string;
+            name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            scope: "builtin";
+            slug: string;
+        };
+        CapabilityCatalogItem: {
+            /** @description The template folder's name, if any */
+            group?: string;
+            /** @constant */
+            hidden: false;
+            /** @description The template id */
+            key: string;
+            name: string;
+            note: string;
+            /** @constant */
+            source: "derived";
+            template: string;
+            templateId: string;
+        };
+        Chat: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            id: string;
+            /** @description The transcript; JSON column */
+            messages?: unknown;
+            projectId: string | null;
+            title: string;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        ChatAsset: {
+            chatId: string;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            filename: string;
+            id: string;
+            mimeType: string | null;
+            /** @description Short-lived download URL */
+            presignedUrl: string | null;
+            s3Key: string;
+            size: number | null;
+            /** @description Who produced it, e.g. "agent" */
+            source: string;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        ClassifiedFields: ({
+            name?: string;
+            /** @description Absent when this field's classification call failed */
+            sensitive?: boolean;
+        } & {
+            [key: string]: unknown;
+        })[];
+        ConnectionTable: {
+            columns: {
+                column_name: string;
+                data_type: string;
+            }[];
+            /** @description Foreign keys pointing AT this table */
+            dependencies: {
+                dependent_column: string;
+                dependent_table: string;
+                referenced_column: string;
+            }[];
+            /** @description One element; the row count is at `rows[0].total_count` */
+            rows: {
+                total_count?: unknown;
+            }[];
+            table_name: string;
+        };
+        ConnectionVerdict: {
+            message: string;
+            ok: boolean;
+            /** @description Upstream HTTP status, when one was received */
+            status?: number;
+        };
+        CsrfToken: {
+            /** @description The full Cookie header value; absent when none was set */
+            cookie?: string;
+            cookie_name: string;
+            cookie_value: string;
+            csrf_token: string;
+        };
+        CsvBatchUploadError: {
+            error: string;
+            /** @constant */
+            ok: false;
+        };
+        CsvBatchUploadResult: {
+            files: {
+                deduped: boolean;
+                /** @description The storage key */
+                key: string;
+                /** @description Sanitised filename, path stripped */
+                name: string;
+                /** @description Presigned download URL, valid 7 days */
+                url: string;
+            }[];
+            /** @description As sent by the caller; null when none was given */
+            folderName: string | null;
+            /** @description The storage prefix the files landed under */
+            folderPrefix: string;
+            /** @constant */
+            ok: true;
+        };
+        CurrentUser: {
+            avatar?: string | null;
+            email?: string;
+            id?: string;
+            name?: string;
+            picture?: string | null;
+        } & {
+            [key: string]: unknown;
+        };
+        CustomDataType: {
+            createdBy: string;
+            /** @description Field configuration; JSON column */
+            fieldConfig?: unknown;
+            id: string;
+            name: string;
+            projectId: string;
+            teamId: string;
+        };
+        DatabaseExportResult: {
+            /** @description e.g. "INSERT", "SELECT" */
+            command: string;
+            fields: {
+                columnID: number;
+                /** @description Postgres type OID */
+                dataTypeID: number;
+                dataTypeModifier: number;
+                dataTypeSize: number;
+                format: string;
+                name: string;
+                tableID: number;
+            }[];
+            oid: number | null;
+            rowCount: number | null;
+            rows: unknown[];
+        };
+        DatabaseTemplatesProposal: {
+            /** @description Per-table prompts for refining the proposal with the model */
+            ai_prompts: {
+                [key: string]: unknown;
+            }[];
+            /** @description Table names in dependency order; null if a cycle was found */
+            data_generation_order: string[] | null;
+            templates: {
+                createdBy?: string;
+                /** @description Position in `data_generation_order`, or -1 */
+                dbOrderIdx: number;
+                fields: unknown[];
+                /** @description The table name */
+                name: string;
+                projectId?: string;
+                teamId?: string;
+                templateFolderId: string;
+            }[];
+        };
+        DatamakerConfig: {
+            /** @description "" when the server calls providers directly */
+            aiGatewayUrl: string;
+            /** @description An EMPTY array means no restriction, not none allowed */
+            allowedModels: string[];
+            /** @description So a desktop build can detect a major mismatch */
+            apiContractVersion: string;
+            /** @description "" when none is configured */
+            defaultModel: string;
+            /** @description "" to use the <origin>/opencode convention */
+            opencodeUrl: string;
+            /** @description Max rows per generation call */
+            quantityLimit: number;
+        };
         DeletedResult: {
             message: string;
+        };
+        EffectivePermissions: {
+            permissions: string[];
+            /** @description Base team role, null if not a member */
+            role: string | null;
+            teamId: string | null;
+        };
+        Endpoint: {
+            /** @description Masked for ordinary callers */
+            auth?: null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            endpointFolderId: string | null;
+            /** @description Masked for ordinary callers */
+            headers?: null;
+            id: string;
+            /** @enum {string} */
+            method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            name: string;
+            projectId: string | null;
+            queryParams?: null;
+            teamId: string | null;
+            url: string;
+        };
+        EndpointFolder: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            id: string;
+            name: string;
+            projectId: string;
+            teamId: string;
+        };
+        Feedback: {
+            comment: string;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            /** @description FeedbackFeelings enum value */
+            feeling: string;
+            id: string;
+        };
+        FieldType: {
+            /** @description Display metadata for the field picker */
+            meta: {
+                [key: string]: unknown;
+            };
+            /** @description Option keys differ per type */
+            options: {
+                [key: string]: unknown;
+            };
+            /** @description The generator name */
+            type: string;
+        };
+        GeneratedData: {
+            /** @description Resolved reference data used while generating */
+            dependencies: {
+                [key: string]: unknown;
+            };
+            /** @description Generated values, keyed by field name */
+            live_data: {
+                [key: string]: unknown;
+            };
+        };
+        GeneratedTemplateField: {
+            active?: boolean;
+            function?: string;
+            name: string;
+            nested?: components["schemas"]["GeneratedTemplateField"][];
+            optional?: unknown;
+            /** @description Generator-specific settings */
+            options?: unknown;
+            textCase?: string;
+            /** @description A DataMaker generator type */
+            type: string;
+        };
+        GeneratedTemplateFields: components["schemas"]["GeneratedTemplateField"][];
+        ImageAnalysisResult: {
+            /** @description Model-generated description of the image */
+            description: string;
+            /** @constant */
+            success: true;
+        };
+        Integration: {
+            auth?: null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            endpointFolderId: string | null;
+            headers?: null;
+            id: string;
+            /** @description e.g. "sap", "tosca-cloud", "tosca-onprem", "jira" */
+            kind: string;
+            name: string;
+            /** @description Base URL of the external system */
+            origin: string;
+            projectId: string | null;
+            scope: string | null;
+            teamId: string | null;
         };
         KeyMapDeleteResult: {
             /** @description Entries removed */
@@ -3083,6 +3451,52 @@ export interface components {
             /** @description Rows inserted or updated */
             upserted: number;
         };
+        License: {
+            /** @description The verified claims, as captured at activation */
+            captured?: null;
+            /** @description ISO-8601 timestamp */
+            expiresAt: string | null;
+            id: string;
+            /** @description ISO-8601 timestamp */
+            issuedAt: string;
+            issuer: string;
+            keyId: string | null;
+            /** @description Masked rendering; never the usable key */
+            keyMasked: string;
+            offline: boolean;
+            /** @description ISO-8601 timestamp */
+            revokedAt: string | null;
+            seats: number | null;
+            /** @description Derived: active, expired, revoked or superseded */
+            status: string;
+            supersededById: string | null;
+            teamId: string | null;
+            /** @description "server" or "desktop" */
+            type: string;
+        };
+        LicenseStatus: {
+            code: string | null;
+            graceDays: number | null;
+            /** @description ISO-8601 timestamp */
+            graceEndsAt: string | null;
+            issuer: string | null;
+            message: string | null;
+            /** @description "ok" or a degraded mode */
+            mode: string;
+            readOnlyReason: string | null;
+            /** @description Whether this deployment demands a license at all */
+            required: boolean;
+        };
+        LogCleanupResult: {
+            /** @description ISO-8601 timestamp; logs older than this were removed */
+            cutoffDate: string;
+            deletedCount: number;
+            message: string;
+        };
+        LogoutResult: {
+            /** @constant */
+            ok: true;
+        };
         MaskingPolicy: {
             consistent: boolean;
             /** @description ISO-8601 timestamp */
@@ -3098,6 +3512,350 @@ export interface components {
             teamId: string;
             /** @description ISO-8601 timestamp */
             updatedAt: string;
+        };
+        MemberInviteResult: {
+            newMember: {
+                firstName: string | null;
+                lastName: string | null;
+            } & components["schemas"]["TeamMember"];
+            /** @constant */
+            success: true;
+        };
+        MemberRoleAssignment: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            id: string;
+            roleId: string;
+            teamMemberId: string;
+        };
+        PackCatalog: {
+            enabled: boolean;
+            packs?: unknown[];
+        } & {
+            [key: string]: unknown;
+        };
+        PackCreatedCounts: {
+            datatypes: number;
+            plans: number;
+            scenarios: number;
+            skills: number;
+            templates: number;
+        };
+        PackExportResult: {
+            pack: {
+                assets: {
+                    /** @default [] */
+                    datatypes: {
+                        fieldConfig?: unknown;
+                        name: string;
+                    }[];
+                    /** @default [] */
+                    plans: {
+                        spec: {
+                            approval?: {
+                                reason: string;
+                                role: string;
+                            };
+                            capabilities?: {
+                                expectedCount?: number;
+                                expectedSumCents?: number;
+                                group?: string;
+                                /** @default false */
+                                hidden: boolean;
+                                key: string;
+                                name: string;
+                                /** @default  */
+                                note: string;
+                                setId?: string;
+                                /**
+                                 * @default derived
+                                 * @enum {string}
+                                 */
+                                source: "derived" | "manual";
+                                sumField?: string;
+                                template?: string;
+                                templateId?: string;
+                            }[];
+                            /** @default [] */
+                            constraints: string[];
+                            coverage?: {
+                                count: number;
+                                family: string;
+                                items: string[];
+                            }[];
+                            coverageConfig?: {
+                                /** @default 14 */
+                                freshnessDays: number;
+                                /**
+                                 * @default release
+                                 * @enum {string}
+                                 */
+                                mode: "release" | "migration";
+                                sourceSystem?: string;
+                                /** @default 0 */
+                                sumToleranceCents: number;
+                                targetSystem?: string;
+                            };
+                            /** @default [] */
+                            entities: {
+                                endpointId?: string;
+                                key: string;
+                                name: string;
+                                /** @default  */
+                                note: string;
+                                template: string;
+                                templateId?: string;
+                                volume: number;
+                            }[];
+                            /** @default [] */
+                            expectations: string[];
+                            flow?: {
+                                loop?: string | null;
+                                phase: string;
+                                steps: {
+                                    fields?: string[];
+                                    from: string;
+                                    iface: string;
+                                    kind: string;
+                                    msg: string;
+                                    reachable?: boolean;
+                                    scaffold?: {
+                                        entity: string;
+                                        fields: string[];
+                                        ops: string[];
+                                    };
+                                    /** @enum {string} */
+                                    status: "mapped" | "likely" | "custom" | "unknown";
+                                    to: string;
+                                    why?: string;
+                                }[];
+                            }[];
+                            /** @default [] */
+                            gaps: {
+                                action?: string;
+                                iface?: string;
+                                /** @default  */
+                                note: string;
+                                scaffold?: {
+                                    entity: string;
+                                    fields: string[];
+                                    ops: string[];
+                                };
+                                title: string;
+                                /** @enum {string} */
+                                type: "connect" | "custom" | "input" | "blocker" | "gap" | "stale";
+                            }[];
+                            /** @default [] */
+                            integrations: {
+                                /** @enum {string} */
+                                access: "read" | "write";
+                                /** @default  */
+                                detail: string;
+                                system: string;
+                                via: string;
+                            }[];
+                            /** @enum {string} */
+                            kind?: "entity" | "flow" | "task" | "mapping";
+                            /** @default [] */
+                            lanes: string[];
+                            lifecycle?: {
+                                mode: string;
+                                refresh: string;
+                                replenish: string;
+                            };
+                            mappingConfig?: {
+                                keyMapName?: string;
+                                maskingPolicyId?: string;
+                                maskingPolicyName?: string;
+                                sourceObject?: string;
+                                sourceSystem?: string;
+                                targetObject?: string;
+                                targetSystem?: string;
+                            };
+                            mappings?: {
+                                /** @default false */
+                                generate: boolean;
+                                keyMapName?: string;
+                                maskingPolicyId?: string;
+                                /** @default  */
+                                note: string;
+                                sourceField?: string;
+                                /**
+                                 * @default open
+                                 * @enum {string}
+                                 */
+                                status: "mapped" | "open" | "needs-review";
+                                targetField: string;
+                                /** @default  */
+                                transform: string;
+                            }[];
+                            /** @default [] */
+                            steps: string[];
+                            tasks?: {
+                                note?: string;
+                                phase: string;
+                                tasks: {
+                                    /** @default [] */
+                                    deps: string[];
+                                    /** @default  */
+                                    detail: string;
+                                    key?: string;
+                                    /** @enum {string} */
+                                    priority?: "P0" | "P1" | "P2" | "P3";
+                                    title: string;
+                                }[];
+                            }[];
+                            version?: {
+                                by: string;
+                                n: number;
+                                when: string;
+                            };
+                        };
+                        summary?: string;
+                        title: string;
+                    }[];
+                    /** @default [] */
+                    scenarios: {
+                        description?: string;
+                        files: {
+                            content: string;
+                            name: string;
+                        }[];
+                        name: string;
+                        /** @default [] */
+                        params: {
+                            default?: string;
+                            description?: string;
+                            name: string;
+                        }[];
+                    }[];
+                    /** @default [] */
+                    skills: {
+                        body: string;
+                        description: string;
+                        name: string;
+                        slug: string;
+                    }[];
+                    /** @default [] */
+                    templates: {
+                        fields?: unknown;
+                        name: string;
+                        seed?: number;
+                        simulationConfig?: unknown;
+                    }[];
+                };
+                checksum?: string;
+                /** @constant */
+                format: "dmpack@1";
+                manifest: {
+                    createdAt?: string;
+                    description: string;
+                    license?: string;
+                    name: string;
+                    publisher: string;
+                    /** @default [] */
+                    requires: {
+                        /** @constant */
+                        kind: "integration";
+                        note?: string;
+                        type: string;
+                    }[];
+                    version: string;
+                };
+                publicKeyId?: string;
+                signature?: string;
+            };
+            warnings: string[];
+        };
+        PackImportDiff: {
+            containsScenarios: boolean;
+            entries: {
+                /** @enum {string} */
+                action: "create" | "skip";
+                /** @description Only on skips: the existing asset's content differs */
+                conflict?: boolean;
+                /** @description Template/plan/datatype/scenario name, or skill slug */
+                key: string;
+                /** @enum {string} */
+                kind: "template" | "skill" | "plan" | "datatype" | "scenario";
+            }[];
+            missingRequirements: {
+                /** @constant */
+                kind: "integration";
+                note?: string;
+                type: string;
+            }[];
+            pack: {
+                name: string;
+                version: string;
+            };
+            /** @enum {string} */
+            signature: "valid" | "invalid" | "unsigned";
+        };
+        PackInstall: {
+            created: components["schemas"]["PackCreatedCounts"];
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            id: string;
+            /** @description A TeamMembers id */
+            installedBy: string | null;
+            manifest: {
+                createdAt?: string;
+                description: string;
+                license?: string;
+                name: string;
+                publisher: string;
+                /** @default [] */
+                requires: {
+                    /** @constant */
+                    kind: "integration";
+                    note?: string;
+                    type: string;
+                }[];
+                version: string;
+            };
+            /** @description `publisher/slug` */
+            name: string;
+            projectId: string | null;
+            /** @description "valid" or "unsigned" at install time */
+            signature: string;
+            /** @enum {string} */
+            source: "catalog" | "file";
+            teamId: string | null;
+            version: string;
+        };
+        PackInstallListItem: {
+            installedByName: string | null;
+        } & components["schemas"]["PackInstall"];
+        PackInstallResult: {
+            /** @description Absent on a dry run */
+            created?: components["schemas"]["PackCreatedCounts"];
+            diff: components["schemas"]["PackImportDiff"];
+            /** @description Absent on a dry run */
+            install?: components["schemas"]["PackInstall"];
+        };
+        PdfAnalysisResult: {
+            /** @description Model-extracted fields; no key is guaranteed */
+            documentInfo: {
+                [key: string]: unknown;
+            };
+            /** @description Presigned URL for the uploaded file */
+            downloadUrl: string;
+            /**
+             * @description Which extraction path produced `documentInfo`
+             * @enum {string}
+             */
+            method: "text_extraction" | "image_analysis";
+            /** @constant */
+            success: true;
+            /** @description Characters extracted; absent on the image path */
+            textLength?: number;
+        };
+        PermissionCatalogue: {
+            all: string[];
+            grouped: {
+                [key: string]: string[];
+            };
         };
         Plan: {
             /** @description ISO-8601 timestamp */
@@ -3292,6 +4050,156 @@ export interface components {
         PlanDeleteResult: {
             success: boolean;
         };
+        PlanRun: {
+            /** @description ISO-8601 timestamp */
+            completedAt: string | null;
+            error: string | null;
+            /** @description Only on GET /plans/:planId/runs/:runId */
+            files?: components["schemas"]["PlanRunFile"][];
+            id: string;
+            logs: unknown[];
+            /** @description generate | release | migration */
+            mode: string;
+            planId: string;
+            /** @description The graded check result; null on generate runs */
+            results: {
+                config: {
+                    /** @default 14 */
+                    freshnessDays: number;
+                    /**
+                     * @default release
+                     * @enum {string}
+                     */
+                    mode: "release" | "migration";
+                    sourceSystem?: string;
+                    /** @default 0 */
+                    sumToleranceCents: number;
+                    targetSystem?: string;
+                };
+                /** @default [] */
+                gaps: {
+                    action?: string;
+                    iface?: string;
+                    /** @default  */
+                    note: string;
+                    scaffold?: {
+                        entity: string;
+                        fields: string[];
+                        ops: string[];
+                    };
+                    title: string;
+                    /** @enum {string} */
+                    type: "connect" | "custom" | "input" | "blocker" | "gap" | "stale";
+                }[];
+                /** @default [] */
+                items: {
+                    /** @default [] */
+                    checks: {
+                        /** @default  */
+                        detail: string;
+                        id: string;
+                        label: string;
+                        /** @enum {string} */
+                        status: "pass" | "warn" | "fail" | "skip";
+                    }[];
+                    group?: string;
+                    key: string;
+                    name: string;
+                    /** @enum {string} */
+                    status: "ready" | "partial" | "missing" | "reconciled" | "discrepancy";
+                }[];
+                /** @enum {string} */
+                mode: "release" | "migration";
+                summary: {
+                    failing: number;
+                    partial: number;
+                    passing: number;
+                    scorePct: number;
+                    total: number;
+                };
+                /** @enum {string} */
+                verdict: "ready" | "partial" | "blocked" | "reconciled" | "discrepancy";
+            } | null;
+            rows: number;
+            /** @description "manual", "agent" or "mcp" */
+            source: string;
+            /** @description ISO-8601 timestamp */
+            startedAt: string;
+            /** @description queued | running | completed | failed */
+            status: string;
+            verdict: string | null;
+        };
+        PlanRunAccepted: {
+            runId: string;
+            /** @constant */
+            status: "running";
+        };
+        PlanRunAck: {
+            /** @constant */
+            ok: true;
+        };
+        PlanRunFile: {
+            entity: string;
+            filename: string;
+            id: string;
+            mimeType: string | null;
+            presignedUrl: string | null;
+            size: number;
+        };
+        PlanRunFileAck: {
+            file: {
+                entity: string;
+                filename: string;
+                id: string;
+                /** @description The S3 key */
+                key: string;
+                mimeType: string | null;
+                size: number;
+            };
+            /** @constant */
+            ok: true;
+        };
+        PlanSignoff: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            id: string;
+            note: string | null;
+            planId: string;
+            planRunId: string;
+            /** @description Immutable snapshot: run results + the definition of done */
+            report?: unknown;
+            /** @description sha256 hex of the canonical report JSON */
+            reportHash: string;
+            /** @description Display name, stamped server-side */
+            signedBy: string;
+            /** @description The covered run's verdict at sign-off time */
+            verdict: string;
+        };
+        PreferencesUpdateError: {
+            /** @description Absent on the 401 */
+            error?: string;
+            /** @constant */
+            ok: false;
+        };
+        PreferencesUpdateResult: {
+            /** @constant */
+            ok: true;
+            theme: string;
+        };
+        PreviewResult: {
+            /** @description Parsed JSON when `isJson`, raw text otherwise */
+            data?: unknown;
+            /** @description The upstream RESPONSE headers, lowercased */
+            headers: {
+                [key: string]: string;
+            };
+            isJson: boolean;
+            /** @description Milliseconds */
+            responseTime: number;
+            /** @description The upstream HTTP status */
+            status: number;
+            statusText: string;
+        };
         Project: {
             avatar: string | null;
             /** @description ISO-8601 timestamp */
@@ -3301,6 +4209,442 @@ export interface components {
             id: string;
             name: string;
             teamId: string;
+        };
+        PythonExecutionError: {
+            error: string;
+            executionTime?: number;
+            jobId?: string;
+            logs?: unknown[];
+            result?: unknown;
+            status?: string;
+            /** @constant */
+            success: false;
+        };
+        PythonExecutionResult: {
+            /** @description Milliseconds */
+            executionTime?: number;
+            jobId: string;
+            logs?: unknown[];
+            /** @description Only on the async path, where the job was merely queued */
+            message?: string;
+            /** @description The worker's return value; absent on the async path */
+            result?: unknown;
+            /** @description "completed" on the sync paths; the queue state otherwise */
+            status: string;
+            /** @constant */
+            success: true;
+        };
+        Role: {
+            /** @description TeamRole this role derives from, for system roles */
+            baseRole: string | null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            description: string | null;
+            id: string;
+            isSystem: boolean;
+            name: string;
+            teamId: string;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        SapServiceCatalog: {
+            activeCount?: number;
+            inactiveCount?: number;
+            probed: boolean;
+            probedCount?: number;
+            services: {
+                description: string;
+                id: string;
+                isActive?: boolean;
+                metadataUrl: string;
+                serviceUrl: string;
+                version?: string;
+            }[];
+            /** @enum {string} */
+            status?: "active" | "inactive";
+            /** @description The count AFTER filtering and ?limit= */
+            total: number;
+            /** @description The system has more services than one call will probe */
+            truncated?: boolean;
+        };
+        Scenario: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            description: string | null;
+            diagram: string | null;
+            diagramBusiness: string | null;
+            diagramError: string | null;
+            diagramSourceHash: string | null;
+            diagramStatus: string;
+            /** @description ISO-8601 timestamp */
+            diagramUpdatedAt: string | null;
+            /** @description Name/value map; JSON column */
+            environmentVariables?: unknown;
+            id: string;
+            name: string;
+            /** @description Short-lived S3 URL for the script */
+            presignedUrl: string | null;
+            projectId: string;
+            /** @description Short-lived S3 URL for requirements.txt */
+            requirementsUrl: string | null;
+            storageUsed: number;
+            teamId: string;
+            timeoutSeconds: number;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        ScenarioDiagramRegenerateAccepted: {
+            /** @constant */
+            status: "pending";
+        };
+        ScenarioEnvironmentVariableList: {
+            environmentVariables: {
+                key: string;
+                value: string;
+            }[];
+        };
+        ScenarioEnvironmentVariables: {
+            environmentVariables: {
+                [key: string]: string;
+            };
+        };
+        ScenarioFile: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            filename: string;
+            /** @enum {string} */
+            folder: "uploads" | "outputs";
+            id: string;
+            /** @description Storage key; unique */
+            key: string;
+            mimeType: string | null;
+            /** @description Short-lived download URL */
+            presignedUrl: string | null;
+            scenarioId: string;
+            /** @description Bytes */
+            size: number;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        ScenarioFileCreated: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            /** @description The stored `key` */
+            filePath: string;
+            /** @description "uploads" or "outputs" */
+            folder: string;
+            id: string;
+            mimeType: string | null;
+            /** @description The stored `filename` */
+            name: string;
+            /** @description Bytes */
+            size: number;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        ScenarioJob: {
+            /** @description Epoch milliseconds */
+            createdAt: number | null;
+            /** @description Epoch milliseconds */
+            finishedAt: number | null;
+            jobId: string | null;
+            /** @description Epoch milliseconds */
+            processedAt: number | null;
+            projectId: string | null;
+            scenarioId: string | null;
+            scenarioName: string | null;
+            /** @description e.g. "active", "waiting", "completed", "failed", "cancelled" */
+            state: string;
+            teamId: string | null;
+        };
+        ScenarioJobStatus: {
+            error: string | null;
+            logs: {
+                count: number;
+                logs: string[];
+            };
+            output: string | null;
+            /** @description BullMQ's job progress; always 0 on the local-run fallback */
+            progress: number | string | boolean | {
+                [key: string]: unknown;
+            };
+            /** @description Normalised: "active", "completed" or "failed" (see above) */
+            state: string;
+        };
+        ScenarioJobs: {
+            jobs: components["schemas"]["ScenarioJob"][];
+        };
+        ScenarioLog: {
+            /** @description ISO-8601 timestamp */
+            completedAt: string | null;
+            createdBy: string;
+            error: string | null;
+            id: string;
+            /** @description BullMQ job id; unique */
+            jobId: string;
+            /** @description Normalised log lines */
+            logs: unknown[];
+            output: string | null;
+            scenarioId: string;
+            /** @description How the run was started, e.g. "manual" */
+            source: string;
+            /** @description ISO-8601 timestamp */
+            startedAt: string;
+            /** @description "queued", "running", "completed" or "failed" */
+            status: string;
+        };
+        SchemaGraphChange: {
+            entity: components["schemas"]["SchemaGraphEntity"];
+            /** @constant */
+            kind: "entity";
+            /** @enum {string} */
+            status: "added" | "removed";
+        } | {
+            creatable?: {
+                cached: boolean;
+                live: boolean;
+            };
+            entitySet?: {
+                cached?: string;
+                live?: string;
+            };
+            keys?: {
+                cached: string[];
+                live: string[];
+            };
+            /** @constant */
+            kind: "entity";
+            label?: {
+                cached: string;
+                live: string;
+            };
+            name: string;
+            properties: ({
+                /** @constant */
+                kind: "property";
+                property: components["schemas"]["SchemaGraphProperty"];
+                /** @enum {string} */
+                status: "added" | "removed";
+            } | {
+                changes: {
+                    creatable?: {
+                        cached: boolean;
+                        live: boolean;
+                    };
+                    label?: {
+                        cached?: string;
+                        live?: string;
+                    };
+                    maxLength?: {
+                        cached?: number;
+                        live?: number;
+                    };
+                    nullable?: {
+                        cached: boolean;
+                        live: boolean;
+                    };
+                    type?: {
+                        cached: string;
+                        live: string;
+                    };
+                    updatable?: {
+                        cached: boolean;
+                        live: boolean;
+                    };
+                };
+                /** @constant */
+                kind: "property";
+                name: string;
+                /** @constant */
+                status: "modified";
+            })[];
+            /** @constant */
+            status: "modified";
+            updatable?: {
+                cached: boolean;
+                live: boolean;
+            };
+        } | {
+            /** @constant */
+            kind: "navigation";
+            navigation: components["schemas"]["SchemaGraphNavigation"];
+            /** @enum {string} */
+            status: "added" | "removed";
+        } | {
+            changes: {
+                cardinality?: {
+                    cached: string;
+                    live: string;
+                };
+                to?: {
+                    cached: string;
+                    live: string;
+                };
+            };
+            from: string;
+            /** @constant */
+            kind: "navigation";
+            name: string;
+            /** @constant */
+            status: "modified";
+        };
+        SchemaGraphConnectResult: {
+            /** @description The NEW bridge endpoint that was created */
+            endpointId: string;
+            endpointName: string;
+            entity: string;
+            fieldsUpgraded: number;
+            templateId: string;
+            /** @description Names of the upgraded fields */
+            upgraded: string[];
+        };
+        SchemaGraphDiffResult: {
+            /** @description ISO-8601 timestamp: when the cached graph was last refreshed */
+            cachedRefreshedAt: string;
+            changes: components["schemas"]["SchemaGraphChange"][];
+            drifted: boolean;
+            endpointId: string;
+            metadataUrl: string;
+            namespace: {
+                cached: string;
+                live: string;
+            };
+            odataVersion: {
+                cached: string;
+                live: string;
+            };
+            summary: {
+                entitiesAdded: number;
+                entitiesModified: number;
+                entitiesRemoved: number;
+                navigationsAdded: number;
+                navigationsChanged: number;
+                navigationsRemoved: number;
+                propertiesAdded: number;
+                propertiesChanged: number;
+                propertiesRemoved: number;
+            };
+        };
+        SchemaGraphEntity: {
+            creatable: boolean;
+            /** @description Only when the type is bound */
+            entitySet?: string;
+            keys: string[];
+            /** @constant */
+            kind: "entity";
+            /** @description sap:label, falling back to the name */
+            label: string;
+            /** @description EntityType name, e.g. "SalesOrder" */
+            name: string;
+            properties: components["schemas"]["SchemaGraphProperty"][];
+            updatable: boolean;
+        };
+        SchemaGraphEntityContext: {
+            entity: components["schemas"]["SchemaGraphEntity"];
+            navigatedFrom: {
+                cardinality: string;
+                from: string;
+                name: string;
+            }[];
+            navigatesTo: {
+                cardinality: string;
+                name: string;
+                to: string;
+            }[];
+        };
+        SchemaGraphMinedField: {
+            /** @description Occurrence count per value, same order as `values` */
+            counts: number[];
+            distinct: number;
+            /** @description Few distinct values AND repeats observed: treat as a SAP code-list */
+            enumLike: boolean;
+            name: string;
+            /** @description Non-empty values seen for this field */
+            sampled: number;
+            /** @description Capped, most frequent first */
+            values: string[];
+        };
+        SchemaGraphNavigation: {
+            /** @description "1", "0..1" or "*" */
+            cardinality: string;
+            from: string;
+            /** @constant */
+            kind: "navigation";
+            /** @description NavigationProperty name on the source */
+            name: string;
+            to: string;
+        };
+        SchemaGraphPathResult: {
+            path: {
+                from: string;
+                to: string;
+                via: string;
+            }[];
+        };
+        SchemaGraphPreviewResult: {
+            count: number;
+            entity: string;
+            entitySet: string;
+            /** @description Business fields only; OData bookkeeping keys are stripped */
+            rows: {
+                [key: string]: unknown;
+            }[];
+        };
+        SchemaGraphProperty: {
+            creatable: boolean;
+            /** @description From sap:label when present */
+            label?: string;
+            maxLength?: number;
+            name: string;
+            nullable: boolean;
+            /** @description EDM type, e.g. "Edm.String" */
+            type: string;
+            updatable: boolean;
+        };
+        SchemaGraphRefreshResult: {
+            entities: number;
+            metadataUrl: string;
+            namespace: string;
+            navigations: number;
+            /** @description "2.0" or "4.0" */
+            odataVersion: string;
+            /** @description The EDMX hash moved since the last refresh; false on a first refresh */
+            schemaChanged: boolean;
+        };
+        SchemaGraphSampleResult: {
+            entity: string;
+            fields: components["schemas"]["SchemaGraphMinedField"][];
+            rowsSampled: number;
+            /** @description Entity sets that look like value-help / code-list sets */
+            valueHelpSets: string[];
+        };
+        SchemaGraphSearchResult: {
+            results: {
+                entitySet?: string;
+                label: string;
+                name: string;
+                score: number;
+            }[];
+        };
+        SchemaGraphTemplateResult: {
+            entity: string;
+            fieldCount: number;
+            id: string;
+            /** @description Fields turned into Custom generators from sampled values; empty unless `useSamples` was sent */
+            minedFields: string[];
+            name: string;
+        };
+        SessionTokens: {
+            /** @description Short-lived JWT - secret */
+            accessToken: string;
+            /** @description Access token lifetime, in seconds */
+            expiresIn: number;
+            /** @description ISO-8601 timestamp the refresh token expires at */
+            refreshExpiresAt: string;
+            /** @description Rotated on every use - secret */
+            refreshToken: string;
         };
         Set: {
             /** @description ISO-8601 timestamp */
@@ -3320,6 +4664,65 @@ export interface components {
         SetDetail: {
             createdByName: string | null;
         } & components["schemas"]["Set"];
+        Shortcut: {
+            /** @description ShortcutsContext enum value */
+            context: string;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            /** @description The action the binding triggers */
+            function: string;
+            id: string;
+            keys: string[];
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+            userId: string | null;
+        };
+        Skill: components["schemas"]["TeamSkill"] | components["schemas"]["BuiltinSkill"];
+        StringList: string[];
+        SuccessResult: {
+            success: boolean;
+        };
+        Team: {
+            avatar: string | null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            id: string;
+            name: string;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
+        TeamMember: {
+            id: string;
+            /** @description TeamRole enum value, e.g. OWNER / ADMIN / MEMBER */
+            role: string;
+            teamId: string;
+            userId: string;
+        };
+        TeamSetupResult: {
+            project: components["schemas"]["Project"];
+            team: components["schemas"]["Team"];
+            teamMember: components["schemas"]["TeamMember"];
+        };
+        TeamSkill: {
+            appliedCount: number;
+            /** @description The SKILL.md body */
+            body: string;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            description: string;
+            enabled: boolean;
+            id: string;
+            name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            scope: "team";
+            slug: string;
+            /** @description ISO-8601 timestamp */
+            updatedAt: string;
+        };
         Template: {
             /** @description ISO-8601 timestamp */
             createdAt: string;
@@ -3333,6 +4736,128 @@ export interface components {
             simulationConfig?: null;
             teamId: string | null;
             templateFolderId: string | null;
+        };
+        TemplateFolder: {
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            createdBy: string | null;
+            id: string;
+            isDatabase: boolean;
+            name: string;
+            projectId: string | null;
+            teamId: string | null;
+        };
+        ToscaOnPremWorkspaces: {
+            workspaces: string[];
+        };
+        ToscaWorkspaces: {
+            /** @enum {string} */
+            kind: "tosca-onprem" | "tosca-cloud";
+            workspaces: string[];
+        };
+        UploadResult: {
+            /** @description Short-lived download URL */
+            downloadUrl: string;
+            /** @description The storage key, not the original filename */
+            fileName: string;
+            success: boolean;
+        };
+        UploadTextResult: {
+            /** @description Only when a chatId was supplied and the asset was recorded */
+            chatAssetId?: string;
+            /** @description The storage key, not the original filename */
+            fileName: string;
+            /** @constant */
+            success: true;
+            /** @description Presigned download URL */
+            url: string;
+        };
+        User: {
+            autoSave: boolean | null;
+            avatar: string | null;
+            /** @description ISO-8601 timestamp */
+            createdAt: string;
+            creationPurpose: string;
+            email: string;
+            firstName: string;
+            id: string;
+            /** @description ISO-8601 timestamp */
+            lastLogin: string;
+            lastName: string;
+        };
+        UserPreferences: {
+            theme: string | null;
+        };
+        WorkerWorkspaceInfo: {
+            fileCount: number;
+            /** @description Bytes */
+            maxFileSize: number;
+            paths: {
+                outputs: string;
+                uploads: string;
+            };
+            projectId: string;
+            scenarioId: string;
+            /** @description Bytes */
+            storageLimit: number;
+            /** @description Bytes */
+            storageUsed: number;
+            teamId: string;
+        };
+        WorkerWorkspaceListing: {
+            files: {
+                /** @description Freshly signed, 1 hour; the stored URL if re-signing failed */
+                downloadUrl: string | null;
+                filename: string;
+                /** @description "uploads" or "outputs" */
+                folder: string;
+                id: string;
+                /** @description The S3 key */
+                key: string;
+                mimeType: string | null;
+                /** @description Bytes */
+                size: number;
+            }[];
+            scenarioId: string;
+        };
+        WorkerWorkspaceSyncResult: {
+            results: {
+                /** @description One line per file that could not be synced */
+                errors: string[];
+                synced: number;
+            };
+            /** @constant */
+            success: true;
+        };
+        WorkerWorkspaceUploadResult: {
+            file: {
+                filename: string;
+                id: string;
+                key: string;
+                /** @description Bytes */
+                size: number;
+            };
+            /** @constant */
+            success: true;
+        };
+        WorkspaceListing: {
+            files: components["schemas"]["ScenarioFile"][];
+            /** @description Bytes */
+            storageLimit: number;
+            /** @description Bytes */
+            storageUsed: number;
+        };
+        WorkspaceStorage: {
+            /** @description Bytes */
+            storageLimit: number;
+            /** @description Bytes */
+            storageUsed: number;
+            /** @description Rounded percentage */
+            storageUsedPercent: number;
+        };
+        WorkspaceUploadResult: {
+            file: components["schemas"]["ScenarioFile"];
+            success: boolean;
         };
     };
     responses: never;
@@ -3351,7 +4876,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Whether the address dataset is configured and queryable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddressAvailability"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAddressCities: {
         parameters: {
@@ -3361,7 +4914,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Distinct cities for the country and optional region. Empty array when unavailable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StringList"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAddressCountries: {
         parameters: {
@@ -3371,7 +4952,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Distinct countries in the dataset. Empty array when the dataset is unavailable, never an error */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StringList"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAddressPostcodes: {
         parameters: {
@@ -3381,7 +4990,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Distinct postcodes for the country and optional region. Empty array when unavailable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StringList"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAddressRegions: {
         parameters: {
@@ -3391,7 +5028,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Distinct regions for the country. Empty array when unavailable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StringList"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAgentApprovals: {
         parameters: {
@@ -3401,7 +5066,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Pending approval requests for the chat; empty when none */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalDecision"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postAgentApprovals: {
         parameters: {
@@ -3421,7 +5114,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description Whether the write may proceed, or the pending request blocking it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalDecision"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postAgentApprovalsByIdDeny: {
         parameters: {
@@ -3433,7 +5154,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The request after denying */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalStatus"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No pending approval with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postAgentApprovalsByIdGrant: {
         parameters: {
@@ -3445,7 +5203,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The request after granting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalStatus"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No pending approval with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postAnalyze-image": {
         parameters: {
@@ -3455,7 +5250,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description A model-generated description of the image */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageAnalysisResult"];
+                };
+            };
+            /** @description No image URL in the body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The model returned nothing, or the analysis threw */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postAnalyze-pdf": {
         parameters: {
@@ -3465,7 +5306,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The extracted fields, plus which of the three extraction paths produced them */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfAnalysisResult"];
+                };
+            };
+            /** @description No file in the form data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Every extraction path failed, or the request threw */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getApiKeys: {
         parameters: {
@@ -3475,7 +5362,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description API keys in the requested scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"][];
+                };
+            };
+            /** @description The scope needs a team or project id */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Project not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postApiKeys: {
         parameters: {
@@ -3485,7 +5418,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The created key, including its secret value */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putApiKeysById: {
         parameters: {
@@ -3497,7 +5467,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The updated key */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteApiKeysById: {
         parameters: {
@@ -3509,7 +5516,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The key was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Scenario keys cannot be deleted here */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getAuditEvents: {
         parameters: {
@@ -3519,7 +5554,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Recent agent audit events for the team, empty when none */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEvent"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postAuditEvents: {
         parameters: {
@@ -3548,7 +5611,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The recorded event's id */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventRef"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postAuthLogout: {
         parameters: {
@@ -3558,7 +5649,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The token and its whole rotation family were revoked. Answers ok for an unknown token too */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogoutResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postAuthRefresh: {
         parameters: {
@@ -3568,7 +5687,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description A new access token and a ROTATED refresh token - the submitted one is now spent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
+                };
+            };
+            /** @description No refreshToken in the body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The token is unknown, expired, or already spent (reuse revokes the whole family) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postAuthSession: {
         parameters: {
@@ -3578,7 +5734,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description A fresh access + refresh pair for the authenticated caller */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     getBlobByKey: {
         parameters: {
@@ -3590,7 +5774,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The blob's bytes, served under the stored object's own Content-Type */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description No blob key in the path */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No blob under that key, or the deployment is not in filesystem-blob mode */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The blob could not be read from disk */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getChat-assets": {
         parameters: {
@@ -3600,7 +5821,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Assets for the chat, each with a freshly signed download URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatAsset"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postChat-assets": {
         parameters: {
@@ -3622,7 +5871,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The asset, created or already present */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatAsset"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "deleteChat-assetsById": {
         parameters: {
@@ -3634,7 +5911,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The asset was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getChats: {
         parameters: {
@@ -3644,7 +5949,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Chats the caller can see in scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chat"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postChats: {
         parameters: {
@@ -3663,7 +5996,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created chat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chat"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the project's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Project not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getChatsById: {
         parameters: {
@@ -3675,7 +6045,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The chat, including its full transcript */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chat"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No chat with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putChatsById: {
         parameters: {
@@ -3694,7 +6101,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated chat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chat"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No chat with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteChatsById: {
         parameters: {
@@ -3706,7 +6150,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The chat was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No chat with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getConfig: {
         parameters: {
@@ -3716,7 +6197,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Server-owned limits and the AI/agent endpoints a desktop should route through */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatamakerConfig"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getConnections: {
         parameters: {
@@ -3761,7 +6270,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Every table in the public schema with its columns, row count and inbound foreign keys */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionTable"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description No connection with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The query failed, or the database type is not supported */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postConnectionsTest: {
         parameters: {
@@ -3840,7 +6395,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Custom data types in scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomDataType"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postCustomDataTypes: {
         parameters: {
@@ -3861,7 +6444,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created custom data type */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomDataType"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putCustomDataTypesById: {
         parameters: {
@@ -3884,7 +6495,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated custom data type */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomDataType"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteCustomDataTypesById: {
         parameters: {
@@ -3896,7 +6535,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The custom data type was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postDatamaker: {
         parameters: {
@@ -3906,7 +6573,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The generated rows plus the reference data they were built from */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeneratedData"];
+                };
+            };
+            /** @description No fields in the body, or a quantity outside the configured limit */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description No project with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Generation failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     getEndpointFolders: {
         parameters: {
@@ -3916,7 +6638,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Endpoint folders in scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointFolder"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postEndpointFolders: {
         parameters: {
@@ -3937,7 +6687,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created folder */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointFolder"];
+                };
+            };
+            /** @description The folder name is already in use */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putEndpointFoldersById: {
         parameters: {
@@ -3949,7 +6736,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The updated folder */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointFolder"];
+                };
+            };
+            /** @description The folder name is already in use */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteEndpointFoldersById: {
         parameters: {
@@ -3961,7 +6785,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The deleted folder is returned, not a message */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointFolder"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getEndpoints: {
         parameters: {
@@ -3971,7 +6823,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Endpoints in scope. Credentials are masked unless the caller used a scenario execution key */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postEndpoints: {
         parameters: {
@@ -3999,7 +6879,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created endpoint, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+            /** @description The referenced integration is not usable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postEndpointsAuth-resolve": {
         parameters: {
@@ -4021,7 +6938,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The endpoint. Credentials are masked unless the caller used a scenario execution key */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putEndpointsById: {
         parameters: {
@@ -4051,7 +7005,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated endpoint, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+            /** @description The referenced integration is not usable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteEndpointsById: {
         parameters: {
@@ -4063,7 +7054,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The endpoint was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postExecute-python": {
         parameters: {
@@ -4085,7 +7104,62 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The run. `async=true` answers as soon as the job is queued, carrying only `jobId`, `status` and `message` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionError"];
+                };
+            };
+            /** @description The script or requirements URL is not reachable from this project */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionError"];
+                };
+            };
+            /** @description The run did not finish inside the poll window */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionError"];
+                };
+            };
+            /** @description The run failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionError"];
+                };
+            };
+            /** @description The local runner is unreachable */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PythonExecutionError"];
+                };
+            };
+        };
     };
     postExportDb: {
         parameters: {
@@ -4095,7 +7169,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The driver's query result, returned verbatim */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatabaseExportResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The connection is marked read-only, or the caller lacks the permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description No connection with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The query failed, or the database type is not supported */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postExportRest: {
         parameters: {
@@ -4115,7 +7235,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description All feedback */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postFeedback: {
         parameters: {
@@ -4135,7 +7283,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created feedback */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putFeedbackById: {
         parameters: {
@@ -4157,7 +7333,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated feedback */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Feedback"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No feedback with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteFeedbackById: {
         parameters: {
@@ -4169,7 +7382,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The feedback was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No feedback with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getFields: {
         parameters: {
@@ -4179,7 +7429,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Every generator type with its options and display metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldType"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postGenerateDatabase-templates": {
         parameters: {
@@ -4189,7 +7467,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description One proposed template per table, plus the dependency-safe population order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatabaseTemplatesProposal"];
+                };
+            };
+            /** @description No database connection in the body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description No connection with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The database could not be analyzed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postGenerateOpenapiByFormat: {
         parameters: {
@@ -4201,7 +7534,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description A stream of concatenated JSON template objects, one per operation in the spec */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description A format other than json or yaml, or a body that is not a parseable OpenAPI spec */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Generation threw; the body is the raw error text */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
     };
     postGenerateSensitive: {
         parameters: {
@@ -4211,7 +7590,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The submitted fields echoed back with `sensitive` set. A field whose classification failed comes back unchanged rather than failing the batch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassifiedFields"];
+                };
+            };
+            /** @description The body is not an array of fields */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Classification failed outright */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postGenerateTemplate: {
         parameters: {
@@ -4221,7 +7646,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description A bare ARRAY of generated fields - not a template object wrapping them */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeneratedTemplateFields"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The feature is not enabled for this deployment */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Method not allowed */
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The template could not be generated */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     postGetcsrftoken: {
         parameters: {
@@ -4240,7 +7711,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The token and the session cookie it is bound to - SAP rejects the token without the cookie */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfToken"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Fetching the token from the SAP system failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     getIntegrations: {
         parameters: {
@@ -4250,7 +7758,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Integrations in scope, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postIntegrations: {
         parameters: {
@@ -4276,7 +7812,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created integration, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postIntegrationsTest: {
         parameters: {
@@ -4295,7 +7859,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description Probe verdict. Answers 200 with ok:false for a reachable system that rejected the credentials, so callers read `ok`, not the status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionVerdict"];
+                };
+            };
+            /** @description Origin missing or not a valid URL */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getIntegrationsById: {
         parameters: {
@@ -4307,7 +7908,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The integration, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No integration with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putIntegrationsById: {
         parameters: {
@@ -4335,7 +7973,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated integration, credentials masked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No integration with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteIntegrationsById: {
         parameters: {
@@ -4347,7 +8022,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The integration was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No integration with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postIntegrationsByIdEndpoints: {
         parameters: {
@@ -4612,7 +8324,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Workspace names on the connected Tosca On-Prem system */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToscaOnPremWorkspaces"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The Tosca system could not be reached */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getIntegrationsByIdToscaPlaylist-runsByPlaylistRunIdTestcase-runs": {
         parameters: {
@@ -4722,7 +8471,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Workspaces, plus the kind of Tosca system they came from */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToscaWorkspaces"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The Tosca system could not be reached */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getInternalWorkspaceByScenarioIdFiles: {
         parameters: {
@@ -4734,7 +8520,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The scenario's workspace files, newest first, with freshly signed download URLs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkerWorkspaceListing"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Listing the files failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getInternalWorkspaceByScenarioIdInfo: {
         parameters: {
@@ -4746,7 +8578,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The scenario's workspace quota, usage and worker-side paths */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkerWorkspaceInfo"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Reading the workspace info failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postInternalWorkspaceByScenarioIdSync: {
         parameters: {
@@ -4770,7 +8648,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description Metadata synced. PARTIAL FAILURES STILL ANSWER 200 - check `results.errors` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkerWorkspaceSyncResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The sync failed outright */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postInternalWorkspaceByScenarioIdUpload: {
         parameters: {
@@ -4782,7 +8706,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The file was stored and recorded against the scenario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkerWorkspaceUploadResult"];
+                };
+            };
+            /** @description No file in the form data, a folder other than 'outputs', a file over the size cap, or the workspace quota is exhausted */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload to blob storage failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getKeymaps: {
         parameters: {
@@ -5037,7 +9016,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Licenses activated for the team. The key is masked; only `keyMasked` and `keyId` are returned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["License"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postLicensesActivate: {
         parameters: {
@@ -5054,7 +9061,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The activated license, key masked */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["License"];
+                };
+            };
+            /** @description The key is invalid, expired, revoked, of the wrong type, or issued for another product */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getLicensesStatus: {
         parameters: {
@@ -5064,7 +9108,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Effective licensing state for this deployment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LicenseStatus"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getLogs: {
         parameters: {
@@ -5074,7 +9146,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Execution logs in scope, log lines normalised */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postLogs: {
         parameters: {
@@ -5107,7 +9207,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created log entry */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"];
+                };
+            };
+            /** @description The creating team member could not be resolved */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The log could not be created */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteLogsCleanup: {
         parameters: {
@@ -5117,7 +9263,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description How many logs the retention sweep removed, and the cutoff it used */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogCleanupResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getLogsJobByJobId: {
         parameters: {
@@ -5129,7 +9303,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The execution log for that BullMQ job */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario log with that identifier */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     patchLogsJobByJobId: {
         parameters: {
@@ -5154,7 +9365,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The log with its terminal state applied */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario log for that job */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     patchLogsJobByJobIdAppend: {
         parameters: {
@@ -5175,7 +9423,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The log with the appended lines */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario log for that job */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The lines could not be appended */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getLogsScenarioByScenarioId: {
         parameters: {
@@ -5187,7 +9481,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Every execution of that scenario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getLogsById: {
         parameters: {
@@ -5199,7 +9521,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The execution log */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioLog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario log with that identifier */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteLogsById: {
         parameters: {
@@ -5211,7 +9570,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The log entry was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario log with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getMasking-policies": {
         parameters: {
@@ -5516,7 +9912,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The catalog index, or `{ enabled: false, packs: [] }` when HUB_CATALOG_URL is unset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackCatalog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The catalog host is unreachable or answered non-2xx (that body also carries `enabled: true`) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPacksCatalogInstall: {
         parameters: {
@@ -5537,7 +9970,71 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The diff alone on a dry run; the diff plus `created` and `install` when `confirm: true` wrote */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackInstallResult"];
+                };
+            };
+            /** @description `confirm: true` was not sent, so nothing was written (that body also carries `diff`) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The Hub catalog is not configured, or no project with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The pack does not carry a valid signature; catalog installs require one */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The pack could not be fetched from the catalog, or it served an invalid pack */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPacksExport: {
         parameters: {
@@ -5577,7 +10074,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The portable pack with its checksum, plus one warning per asset that could not be included */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackExportResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No project with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPacksImport: {
         parameters: {
@@ -5598,7 +10132,62 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The diff alone on a dry run; the diff plus `created` and `install` when `confirm: true` wrote */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackInstallResult"];
+                };
+            };
+            /** @description `confirm: true` was not sent, so nothing was written (that body also carries `diff`) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No project with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a valid .dmpack file, or the pack claims a signature that fails verification */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPacksInstalled: {
         parameters: {
@@ -5608,7 +10197,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Installed packs in scope, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackInstallListItem"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPermissions: {
         parameters: {
@@ -5618,7 +10235,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Every assignable permission string, flat and grouped by resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermissionCatalogue"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPlans: {
         parameters: {
@@ -5666,7 +10311,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description One candidate per project template, name-ordered. Curation lives on the plan, never here */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapabilityCatalogItem"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansSave: {
         parameters: {
@@ -6252,7 +10925,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The completed check run, graded synchronously - no polling needed */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRun"];
+                };
+            };
+            /** @description The plan has no capabilities in scope; derive the catalog and save it to the spec first */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The check engine failed; the run is persisted as failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdRun: {
         parameters: {
@@ -6264,7 +10992,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The run was created and dispatched; poll GET /plans/:planId/runs/:runId */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRunAccepted"];
+                };
+            };
+            /** @description The plan is not runnable: a task plan, a mapping plan, a flow plan, one with no entities, or one whose entities have no matching template (that body also carries `entities`, the unresolved names) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPlansByPlanIdRuns: {
         parameters: {
@@ -6276,7 +11050,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The plan's runs, newest first. `files` is never present here */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRun"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPlansByPlanIdRunsByRunId: {
         parameters: {
@@ -6289,7 +11100,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The run, including `files` with freshly re-signed download URLs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRun"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope, or no run with that id on the plan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdRunsByRunIdComplete: {
         parameters: {
@@ -6312,7 +11160,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The run was finalized and rolled up to the plan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRunAck"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope, or no run with that id on the plan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdRunsByRunIdFiles: {
         parameters: {
@@ -6335,7 +11220,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The artifact was stored and recorded against the run */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRunFileAck"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope, or no run with that id on the plan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The artifact could not be uploaded to blob storage */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdRunsByRunIdLog: {
         parameters: {
@@ -6359,7 +11290,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The log line was appended */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRunAck"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope, or no run with that id on the plan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getPlansByPlanIdSignoffs: {
         parameters: {
@@ -6371,7 +11339,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The plan's sign-offs, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanSignoff"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdSignoffs: {
         parameters: {
@@ -6390,7 +11395,62 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The recorded sign-off. Sign-offs are immutable */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanSignoff"];
+                };
+            };
+            /** @description The run is not a check run, or a non-green verdict was signed off without a waiver note */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope, or no run with that id on the plan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The check run has not completed, carries no readable results, or is already signed off */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPlansByPlanIdStatus: {
         parameters: {
@@ -6417,7 +11477,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The plan at its new status, with the appended history entry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Plan"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No plan with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postPreview: {
         parameters: {
@@ -6427,7 +11524,71 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The upstream response. Note the 200 here means the PROXY succeeded - read `status` for what the endpoint itself answered */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewResult"];
+                };
+            };
+            /** @description URL or method missing, a malformed URL, or a malformed JSON body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description An endpointId was supplied but no endpoint with that id exists */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The proxy threw */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Could not connect to the external endpoint (that body carries `error: "FETCH_ERROR"`) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     getProjects: {
         parameters: {
@@ -6680,7 +11841,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description System and custom roles for the team */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postRoles: {
         parameters: {
@@ -6700,7 +11889,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created custom role */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
+            };
+            /** @description A role with that name already exists on the team */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putRolesById: {
         parameters: {
@@ -6720,7 +11946,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated custom role */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteRolesById: {
         parameters: {
@@ -6732,7 +11986,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The custom role was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postScenario-files": {
         parameters: {
@@ -6756,7 +12038,62 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The stored file, under this endpoint's own field names (`name`, `filePath`) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioFileCreated"];
+                };
+            };
+            /** @description The decoded content is over the size cap, or the workspace quota is exhausted */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The authenticated scope does not cover the scenario's team or project */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload to blob storage failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenarios: {
         parameters: {
@@ -6766,7 +12103,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Scenarios in scope, with freshly signed script URLs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenarios: {
         parameters: {
@@ -6795,7 +12160,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created scenario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            /** @description The creating team member could not be resolved */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenariosExecute: {
         parameters: {
@@ -6853,7 +12255,109 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The scenario created from the chat thread */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            /** @description No team member for the caller, or the chat has no completed agent turns to package */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No chat with that id in this project */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Generation, upload or persistence failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getScenariosJobs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Queued and running executions, active first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioJobs"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The job queue could not be read */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenariosJobsByJobIdCancel: {
         parameters: {
@@ -6865,7 +12369,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Cancellation was accepted; `message` describes what happened */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description No job id, or the job is not in a cancellable state */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The job is not in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Cancellation failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosJobsByJobIdLogsStream: {
         parameters: {
@@ -6877,7 +12436,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description An SSE stream of `log` events (data: one log line) terminated by a single `end` event */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description No job id in the path */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosJobsByJobIdStatus: {
         parameters: {
@@ -6889,7 +12485,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The run's current state, output and log lines */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioJobStatus"];
+                };
+            };
+            /** @description No job id in the path */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No such job on the queue and no ScenarioLog row for it */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Reading the job status failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenariosSave: {
         parameters: {
@@ -6908,7 +12559,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The saved scenario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            /** @description The creating team member could not be resolved */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The scenario could not be saved */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosById: {
         parameters: {
@@ -6920,7 +12617,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The scenario, with freshly signed script URLs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteScenariosById: {
         parameters: {
@@ -6932,7 +12666,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The scenario and its stored script files were deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Deleting the scenario or its S3 files failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     patchScenariosById: {
         parameters: {
@@ -6963,7 +12743,62 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated scenario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Scenario"];
+                };
+            };
+            /** @description No team member for the caller in the scenario's team */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The update failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenariosByIdDiagramRegenerate: {
         parameters: {
@@ -6975,7 +12810,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Regeneration was queued; poll the scenario for `diagramStatus` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioDiagramRegenerateAccepted"];
+                };
+            };
+            /** @description The scenario has no code to diagram yet */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Regeneration could not be started */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getScenariosByIdEnvironment-variables": {
         parameters: {
@@ -6987,7 +12877,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The scenario's environment variables, as an array of key/value pairs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioEnvironmentVariableList"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Reading the variables failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postScenariosByIdEnvironment-variables": {
         parameters: {
@@ -7006,7 +12942,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The full variable map after the addition (a map, not the array the GET returns) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioEnvironmentVariables"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The variable could not be added */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "patchScenariosByIdEnvironment-variables": {
         parameters: {
@@ -7026,7 +13008,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The merged variable map after the update (a map, not the array the GET returns) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioEnvironmentVariables"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The update failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "deleteScenariosByIdEnvironment-variablesByKey": {
         parameters: {
@@ -7039,7 +13067,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The remaining variable map after the removal (a map, not the array the GET returns) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioEnvironmentVariables"];
+                };
+            };
+            /** @description No variable key in the path */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No scenario with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The variable could not be removed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosByScenarioIdFiles: {
         parameters: {
@@ -7051,7 +13134,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Workspace files, with the storage quota they count against */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceListing"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Scenario not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The files could not be listed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postScenariosByScenarioIdFilesUpload: {
         parameters: {
@@ -7063,7 +13192,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The stored file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceUploadResult"];
+                };
+            };
+            /** @description No file, an unknown folder, an oversized file, or the workspace quota is exhausted */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Scenario not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosByScenarioIdFilesByFileId: {
         parameters: {
@@ -7076,7 +13260,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description File metadata with a freshly signed download URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioFile"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description File not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The file could not be read */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteScenariosByScenarioIdFilesByFileId: {
         parameters: {
@@ -7089,7 +13319,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The file was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuccessResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description File not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The delete failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getScenariosByScenarioIdStorage: {
         parameters: {
@@ -7101,7 +13377,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Bytes used, the limit, and the rounded percentage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceStorage"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Scenario not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Storage info could not be read */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdDiff": {
         parameters: {
@@ -7113,7 +13435,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The cached graph compared against live $metadata. The cache is NOT updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphDiffResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, or no graph cached for it yet */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The live document is not parseable as EDMX (that body also carries `metadataUrl`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The $metadata fetch failed (that body also carries `metadataUrl`) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getSchema-graphByIdEntityByName": {
         parameters: {
@@ -7126,7 +13503,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The entity plus its incoming and outgoing navigations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphEntityContext"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, or no such entity in the graph */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdEntityByNameConnect": {
         parameters: {
@@ -7139,7 +13553,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The bridge endpoint that was created and the template fields wired to it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphConnectResult"];
+                };
+            };
+            /** @description templateId was not sent */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, no such entity in the graph, or no such template in this project */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdEntityByNamePreview": {
         parameters: {
@@ -7152,7 +13612,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Real rows with OData bookkeeping keys stripped */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphPreviewResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, or no such entity in the graph */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Reading live rows from the entity set failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdEntityByNameSample": {
         parameters: {
@@ -7165,7 +13671,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Per-field value statistics over the sampled rows, plus the system's value-help sets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphSampleResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, or no such entity in the graph */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sampling live rows from the entity set failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdEntityByNameTemplate": {
         parameters: {
@@ -7178,7 +13730,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The created template's identity - fetch GET /templates/:id for the fields themselves */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphTemplateResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, or no such entity in the graph */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `useSamples` was sent and sampling live rows failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getSchema-graphByIdPath": {
         parameters: {
@@ -7190,7 +13788,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The hop list. An empty array means `from` and `to` resolved to the same entity */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphPathResult"];
+                };
+            };
+            /** @description ?from= or ?to= is missing */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, no graph cached for it, or the two entities are not connected */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postSchema-graphByIdRefresh": {
         parameters: {
@@ -7202,7 +13846,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The graph was parsed and cached */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphRefreshResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The document fetched is not parseable as EDMX (that body also carries `metadataUrl`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The $metadata fetch failed (that body also carries `metadataUrl`) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getSchema-graphByIdSearch": {
         parameters: {
@@ -7214,7 +13913,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Up to 10 hits, best first. An empty or missing ?q= returns no results rather than everything */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaGraphSearchResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope, or no graph cached for it yet */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getSchema-graphByIdServices": {
         parameters: {
@@ -7226,7 +13962,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The Gateway catalog, mapped into DataMaker's shape. The probe counts are present only when ?status= asked for a live reachability probe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SapServiceCatalog"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No endpoint with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The catalog fetch failed - probably not a SAP Gateway system (that body also carries `catalogUrl`) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getSets: {
         parameters: {
@@ -7531,7 +14313,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The team, the caller's membership and the first project, all created in one transaction */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSetupResult"];
+                };
+            };
+            /** @description No user id on the authenticated scope */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getShortcuts: {
         parameters: {
@@ -7541,7 +14351,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The caller's shortcut bindings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shortcut"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postShortcuts: {
         parameters: {
@@ -7562,7 +14400,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created binding */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shortcut"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putShortcutsById: {
         parameters: {
@@ -7585,7 +14451,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated binding */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shortcut"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteShortcutsById: {
         parameters: {
@@ -7597,7 +14491,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The binding was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No shortcut with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getSkills: {
         parameters: {
@@ -7607,7 +14538,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Team skills followed by the built-ins. Mixed list - discriminate on `scope` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Skill"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postSkills: {
         parameters: {
@@ -7628,7 +14587,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created skill */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSkill"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postSkillsImport: {
         parameters: {
@@ -7647,7 +14634,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The skill created from the uploaded SKILL.md */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSkill"];
+                };
+            };
+            /** @description The file could not be parsed as SKILL.md */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getSkillsById: {
         parameters: {
@@ -7659,7 +14683,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The team skill */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSkill"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No skill with that id for this team */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putSkillsById: {
         parameters: {
@@ -7680,7 +14741,44 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated skill */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSkill"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No skill with that id for this team */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteSkillsById: {
         parameters: {
@@ -7692,7 +14790,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The skill was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No skill with that id for this team */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getSkillsByIdExport: {
         parameters: {
@@ -7704,7 +14839,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The SKILL.md document: YAML frontmatter followed by the markdown body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/markdown": string;
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No skill with that id in the caller's scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getTeamMembers: {
         parameters: {
@@ -7714,7 +14886,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Memberships in the caller's accessible teams. Each also carries its Team, Shortcuts, User and CustomRoles relations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postTeamMembers: {
         parameters: {
@@ -7734,7 +14934,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created membership */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No seat available on the team's plan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postTeamMembersInvite: {
         parameters: {
@@ -7757,7 +14985,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created membership, flattened with the invited user's first and last name */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteResult"];
+                };
+            };
+            /** @description That user is already a member of the team */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description The team has no seat available under its current license */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+            /** @description No user with that email */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiMessageError"];
+                };
+            };
+        };
     };
     putTeamMembersById: {
         parameters: {
@@ -7776,7 +15050,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated membership */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteTeamMembersById: {
         parameters: {
@@ -7788,7 +15090,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The membership was removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No team member with that id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postTeamMembersByIdRoles: {
         parameters: {
@@ -7806,7 +15145,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The role assignment. Idempotent - re-assigning an existing role returns the same row */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRoleAssignment"];
+                };
+            };
+            /** @description That role is a system role, which is governed by the member's base role instead */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description No role with that id on this team */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteTeamMembersByIdRolesByRoleId: {
         parameters: {
@@ -7819,7 +15204,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The custom role was unassigned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getTeams: {
         parameters: {
@@ -7829,7 +15242,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Teams the caller belongs to */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postTeams: {
         parameters: {
@@ -7849,7 +15290,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created team */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putTeamsById: {
         parameters: {
@@ -7871,7 +15340,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated team */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteTeamsById: {
         parameters: {
@@ -7883,7 +15380,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The team was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getTemplateFolders: {
         parameters: {
@@ -7893,7 +15418,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Template folders in scope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateFolder"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postTemplateFolders: {
         parameters: {
@@ -7914,7 +15467,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created folder */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateFolder"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putTemplateFoldersById: {
         parameters: {
@@ -7937,7 +15518,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated folder */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateFolder"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteTemplateFoldersById: {
         parameters: {
@@ -7949,7 +15558,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The folder was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getTemplates: {
         parameters: {
@@ -8253,7 +15890,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Where the file landed and a short-lived URL to fetch it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResult"];
+                };
+            };
+            /** @description No file, an unsupported type, an oversized file, or no determinable extension */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postUpload-csv": {
         parameters: {
@@ -8263,7 +15946,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The stored key and a presigned download URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResult"];
+                };
+            };
+            /** @description No file in the form data, a file that is not a CSV, or one over 10MB */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload to blob storage failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "postUpload-csv-batch": {
         parameters: {
@@ -8273,7 +16002,62 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description One entry per file, with `deduped` true where identical content was already stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadResult"];
+                };
+            };
+            /** @description Malformed JSON body, no files, or more than 30 files */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadError"];
+                };
+            };
+            /** @description A single file is over 10MB, or the batch is over 50MB in total */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadError"];
+                };
+            };
+            /** @description R2_BUCKET_NAME is unset, or the upload failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsvBatchUploadError"];
+                };
+            };
+        };
     };
     "postUpload-text": {
         parameters: {
@@ -8294,7 +16078,53 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The stored key and a presigned URL, plus the chat asset id when a chatId was given */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTextResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description A chatId was supplied but no chat with that id exists */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload to blob storage failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getUsers: {
         parameters: {
@@ -8304,7 +16134,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The caller's own user record. Credential columns are omitted client-wide (#2898) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postUsers: {
         parameters: {
@@ -8327,7 +16185,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The created user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     postUsersLogout: {
         parameters: {
@@ -8337,7 +16223,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The auth cookie was cleared */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getUsersMe: {
         parameters: {
@@ -8347,7 +16261,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The caller's identity from the auth scope, with avatar filled from the token's picture claim */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentUser"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getUsersMePermissions: {
         parameters: {
@@ -8357,7 +16299,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Effective permissions for the requested or default team */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EffectivePermissions"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getUsersMePreferences: {
         parameters: {
@@ -8367,7 +16337,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The caller's UI preferences; theme is null when unset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserPreferences"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     patchUsersMePreferences: {
         parameters: {
@@ -8377,7 +16375,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The stored theme */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesUpdateResult"];
+                };
+            };
+            /** @description No theme in the body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesUpdateError"];
+                };
+            };
+            /** @description No user id on the authenticated scope (this body is a bare `{ ok: false }`) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesUpdateError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesUpdateError"];
+                };
+            };
+            /** @description The write failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesUpdateError"];
+                };
+            };
+        };
     };
     postUsersProvision: {
         parameters: {
@@ -8387,7 +16431,44 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description Provisioning outcome as a message; the status carries the meaning */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description No user information on the request */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a user-scoped API key, or the account was recently deleted */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Re-provisioning failed */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     putUsersById: {
         parameters: {
@@ -8412,7 +16493,35 @@ export interface operations {
                 };
             };
         };
-        responses: never;
+        responses: {
+            /** @description The updated user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     deleteUsersById: {
         parameters: {
@@ -8424,7 +16533,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The user was deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedResult"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     patchUsersById: {
         parameters: {
@@ -8436,7 +16573,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The updated user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     getValidateApiKey: {
         parameters: {
@@ -8446,7 +16611,35 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The key authenticated. Only `message` is returned - no key details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyValidation"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The caller lacks the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
     "getWorkspace-filesBy-key": {
         parameters: {
@@ -8456,6 +16649,52 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            /** @description The file for that storage key, with a freshly signed URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioFile"];
+                };
+            };
+            /** @description Missing the key query parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Not a member of the scenario's team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description File not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
     };
 }
